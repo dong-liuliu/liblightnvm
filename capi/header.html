@@ -216,11 +216,6 @@
 <span class="cp">#include</span> <span class="cpf">&lt;stdint.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp"></span>
 
-<span class="cp">#ifdef _WIN32</span>
-<span class="cp">#include</span> <span class="cpf">&lt;Windows.h&gt;</span><span class="cp"></span>
-<span class="k">typedef</span> <span class="n">SSIZE_T</span> <span class="kt">ssize_t</span><span class="p">;</span>
-<span class="cp">#endif</span>
-
 <span class="cp">#include</span> <span class="cpf">&lt;sys/types.h&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;liblightnvm_spec.h&gt;</span><span class="cp"></span>
 
@@ -239,9 +234,8 @@
 	<span class="n">NVM_BE_IOCTL</span> <span class="o">=</span> <span class="mh">0x1</span><span class="p">,</span>	<span class="c1">///&lt; Flag for the IOCTL backend</span>
 	<span class="n">NVM_BE_SYSFS</span> <span class="o">=</span> <span class="mh">0x2</span><span class="p">,</span>	<span class="c1">///&lt; Flag for the IOCTL + sysfs backend</span>
 	<span class="n">NVM_BE_LBA</span> <span class="o">=</span> <span class="mh">0x4</span><span class="p">,</span>	<span class="c1">///&lt; Flag for the IOCTL + sysfs + LBA backend</span>
-	<span class="n">NVM_BE_WIOCTL</span> <span class="o">=</span> <span class="mh">0x8</span><span class="p">,</span>	<span class="c1">///&lt; Flag for the Windows IOCTL backend</span>
 <span class="p">};</span>
-<span class="cp">#define NVM_BE_ALL (NVM_BE_IOCTL | NVM_BE_SYSFS | NVM_BE_LBA)	</span><span class="c1">///&lt; All be identifiers</span>
+<span class="cp">#define NVM_BE_ALL (NVM_BE_IOCTL | NVM_BE_SYSFS | NVM_BE_LBA)	</span><span class="c1">///&lt; All be idents</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * Plane-mode access for IO</span>
@@ -252,6 +246,13 @@
 	<span class="n">NVM_FLAG_PMODE_QUAD</span> <span class="o">=</span> <span class="mh">0x2</span>	<span class="c1">///&lt; Quad-plane (NVM_IO_QUAD_ACCESS)</span>
 <span class="p">};</span>
 <span class="cp">#define NVM_FLAG_DEFAULT (NVM_FLAG_PMODE_SNGL | NVM_FLAG_SCRBL);</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * Flags for device quirks</span>
+<span class="cm"> */</span>
+<span class="k">enum</span> <span class="n">nvm_quirks</span> <span class="p">{</span>
+	<span class="n">NVM_QUIRK_PMODE_ERASE_RUNROLL</span> <span class="o">=</span> <span class="mh">0x1</span>
+<span class="p">};</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * Opaque handle for NVM devices</span>
