@@ -251,7 +251,9 @@
 <span class="cm"> * Flags for device quirks</span>
 <span class="cm"> */</span>
 <span class="k">enum</span> <span class="n">nvm_quirks</span> <span class="p">{</span>
-	<span class="n">NVM_QUIRK_PMODE_ERASE_RUNROLL</span> <span class="o">=</span> <span class="mh">0x1</span>
+	<span class="n">NVM_QUIRK_PMODE_ERASE_RUNROLL</span> <span class="o">=</span> <span class="mh">0x1</span><span class="p">,</span>
+	<span class="n">NVM_QUIRK_OOB_READ_1ST4BYTES_NULL</span> <span class="o">=</span> <span class="mh">0x2</span><span class="p">,</span>
+	<span class="n">NVM_QUIRK_NSID_BY_CONVENTION</span> <span class="o">=</span> <span class="mh">0x4</span>
 <span class="p">};</span>
 
 <span class="cm">/**</span>
