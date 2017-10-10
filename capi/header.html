@@ -252,8 +252,9 @@
 <span class="cm"> */</span>
 <span class="k">enum</span> <span class="n">nvm_quirks</span> <span class="p">{</span>
 	<span class="n">NVM_QUIRK_PMODE_ERASE_RUNROLL</span> <span class="o">=</span> <span class="mh">0x1</span><span class="p">,</span>
-	<span class="n">NVM_QUIRK_OOB_READ_1ST4BYTES_NULL</span> <span class="o">=</span> <span class="mh">0x2</span><span class="p">,</span>
-	<span class="n">NVM_QUIRK_NSID_BY_CONVENTION</span> <span class="o">=</span> <span class="mh">0x4</span>
+	<span class="n">NVM_QUIRK_NSID_BY_NAMECONV</span> <span class="o">=</span> <span class="mh">0x2</span><span class="p">,</span>
+	<span class="n">NVM_QUIRK_OOB_READ_1ST4BYTES_NULL</span> <span class="o">=</span> <span class="mh">0x4</span><span class="p">,</span>
+	<span class="n">NVM_QUIRK_OOB_2LRG</span> <span class="o">=</span> <span class="mh">0x8</span>
 <span class="p">};</span>
 
 <span class="cm">/**</span>
@@ -823,6 +824,24 @@
 <span class="cm"> * @returns 0 on success, -1 on error and errno set to indicate the error.</span>
 <span class="cm"> */</span>
 <span class="kt">int</span> <span class="nf">nvm_dev_set_pmode</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="kt">int</span> <span class="n">pmode</span><span class="p">);</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * Returns the mask of quirks for the given device</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param dev Device handle obtained with `nvm_dev_open`</span>
+<span class="cm"> * @return On success, quirk mask is returned</span>
+<span class="cm"> */</span>
+<span class="kt">int</span> <span class="nf">nvm_dev_get_quirks</span><span class="p">(</span><span class="k">const</span> <span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * Set the default plane-mode for the given device</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param dev Device handle obtained with `nvm_dev_open`</span>
+<span class="cm"> * @param quirks Mask of `enum nvm_quirks`</span>
+<span class="cm"> *</span>
+<span class="cm"> * @returns 0 on success, -1 on error and errno set to indicate the error.</span>
+<span class="cm"> */</span>
+<span class="kt">int</span> <span class="nf">nvm_dev_set_quirks</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="kt">int</span> <span class="n">quirks</span><span class="p">);</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * Returns the ppa-format of the given device</span>
