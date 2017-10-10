@@ -211,6 +211,7 @@ int nvm_be_populate(struct nvm_dev *dev,
 
 	err = vadmin(dev, &cmd, NULL);
 	if (err) {
+		NVM_DEBUG("FAILED: vadmin idf");
 		nvm_buf_free(idf);
 		return -1; // NOTE: Propagate errno
 	}
@@ -232,15 +233,15 @@ int nvm_be_populate(struct nvm_dev *dev,
 		break;
 
 	case NVM_SPEC_VERID_20:
-		geo->sector_nbytes = idf->s20.csecs;
-		geo->meta_nbytes = idf->s20.sos;
-		geo->page_nbytes = idf->s20.mw_min * geo->sector_nbytes;
+		geo->sector_nbytes = idf->s20.geo.csecs;
+		geo->meta_nbytes = idf->s20.geo.sos;
+		geo->page_nbytes = idf->s20.wrt.mw_min * geo->sector_nbytes;
 
-		geo->nchannels = idf->s20.num_ch;
-		geo->nluns = idf->s20.num_lun;
-		geo->nplanes = idf->s20.mw_opt / idf->s20.mw_min;
-		geo->nblocks = idf->s20.num_chk;
-		geo->npages = ((idf->s20.clba * idf->s20.csecs) / geo->page_nbytes) / geo->nplanes;
+		geo->nchannels = idf->s20.geo.num_ch;
+		geo->nluns = idf->s20.geo.num_lun;
+		geo->nplanes = idf->s20.wrt.mw_opt / idf->s20.wrt.mw_min;
+		geo->nblocks = idf->s20.geo.num_cnk;
+		geo->npages = ((idf->s20.geo.clba * idf->s20.geo.csecs) / geo->page_nbytes) / geo->nplanes;
 		geo->nsectors = geo->page_nbytes / geo->sector_nbytes;
 
 		dev->ppaf = idf->s20.ppaf;
