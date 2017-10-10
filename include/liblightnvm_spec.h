@@ -173,32 +173,44 @@ struct nvm_spec_identify_s12 {
 	struct nvm_spec_cgrp grp[4];
 };
 
+struct nvm_spec_geo_s20 {
+	uint16_t	num_ch;
+	uint16_t	num_lun;
+	uint32_t	num_cnk;
+	uint32_t	clba;
+	uint32_t	csecs;
+	uint32_t	sos;
+	uint8_t		resv[44];
+};
+
+struct nvm_spec_wrt_s20 {
+	uint32_t	mw_min;
+	uint32_t	mw_opt;
+	uint32_t	mw_cunits;
+	uint8_t		resv[52];
+};
+
+struct nvm_spec_perf_s20 {
+	uint32_t	trdt;
+	uint32_t	trdm;
+	uint32_t	tprt;
+	uint32_t	tprm;
+	uint32_t	tbet;
+	uint32_t	tbem;
+	uint8_t		resv[40];
+};
+
 struct nvm_spec_identify_s20 {
-	uint8_t verid;
-	uint8_t rsvd_001_003[3];
-	struct nvm_spec_lbaf lbaf;
-	struct nvm_spec_ppaf_nand ppaf;
-	uint8_t rsvd_028_031[4];
-	uint32_t mccap;
-	uint8_t rsvd_036_063[28];
-	uint16_t num_ch;
-	uint16_t num_lun;
-	uint32_t num_chk;
-	uint32_t clba;
-	uint32_t csecs;
-	uint32_t sos;
-	uint8_t rsvd_084_127[44];
-	uint32_t mw_min;
-	uint32_t mw_opt;
-	uint32_t mw_cunits;
-	uint8_t rsvd_140_191[52];
-	uint32_t trdt;
-	uint32_t trdm;
-	uint32_t twrt;
-	uint32_t twrm;
-	uint32_t tcet;
-	uint32_t tcem;
-	uint8_t rsvd_216_255[41];
+	uint8_t				verid;
+	uint8_t				resv[3];
+	struct nvm_spec_lbaf		lbaf;
+	struct nvm_spec_ppaf_nand	ppaf;
+	uint32_t			resv2[1];
+	uint32_t			mccap;
+	uint32_t			resv3[7];
+	struct nvm_spec_geo_s20		geo;
+	struct nvm_spec_wrt_s20		wrt;
+	struct nvm_spec_perf_s20	perf;
 };
 
 /**
