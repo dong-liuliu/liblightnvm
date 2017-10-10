@@ -85,21 +85,24 @@ void _nvm_spec_identify_s20_pr(const struct nvm_spec_identify *identify)
 	printf("nvm_spec_identify:\n");
 	printf("  verid: "NVM_I8_FMT"\n", NVM_I8_TO_STR(idf.verid));
 	printf("  mccap: "NVM_I32_FMT"\n", NVM_I32_TO_STR(idf.mccap));
-	printf("  num_ch: %u\n", idf.num_ch);
-	printf("  num_lun: %u\n", idf.num_lun);
-	printf("  num_chk: %u\n", idf.num_chk);
-	printf("  clba: %u\n", idf.clba);
-	printf("  csecs: %u\n", idf.csecs);
-	printf("  sos: %u\n", idf.sos);
-	printf("  mw_min: %u\n", idf.mw_min);
-	printf("  mw_opt: %u\n", idf.mw_opt);
-	printf("  mw_cunits: %u\n", idf.mw_cunits);
-	printf("  trdt: %d\n", idf.trdt);
-	printf("  trdm: %d\n", idf.trdm);
-	printf("  twrt: %d\n", idf.twrt);
-	printf("  twrm: %d\n", idf.twrm);
-	printf("  tcet: %d\n", idf.tcet);
-	printf("  tcem: %d\n", idf.tcem);
+	printf("  num_ch: %u\n", idf.geo.num_ch);
+	printf("  num_lun: %u\n", idf.geo.num_lun);
+	printf("  num_cnk: %u\n", idf.geo.num_cnk);
+	printf("  clba: %u\n", idf.geo.clba);
+	printf("  csecs: %u\n", idf.geo.csecs);
+	printf("  sos: %u\n", idf.geo.sos);
+	printf("  mw_min: %u\n", idf.wrt.mw_min);
+	printf("  mw_opt: %u\n", idf.wrt.mw_opt);
+	printf("  mw_cunits: %u\n", idf.wrt.mw_cunits);
+	printf("  trdt: %d\n", idf.perf.trdt);
+	printf("  trdm: %d\n", idf.perf.trdm);
+
+	printf("  tprt: %d\n", idf.perf.tprt);
+	printf("  tprm: %d\n", idf.perf.tprm);
+
+	printf("  tbet: %d\n", idf.perf.tbet);
+	printf("  tbem: %d\n", idf.perf.tbem);
+
 	printf("spec_identify_");
 	nvm_spec_lbaf_pr(&idf.lbaf);
 	printf("spec_identify_");
