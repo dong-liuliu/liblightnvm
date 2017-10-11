@@ -234,8 +234,9 @@
 	<span class="n">NVM_BE_IOCTL</span> <span class="o">=</span> <span class="mh">0x1</span><span class="p">,</span>	<span class="c1">///&lt; Flag for the IOCTL backend</span>
 	<span class="n">NVM_BE_SYSFS</span> <span class="o">=</span> <span class="mh">0x2</span><span class="p">,</span>	<span class="c1">///&lt; Flag for the IOCTL + sysfs backend</span>
 	<span class="n">NVM_BE_LBA</span> <span class="o">=</span> <span class="mh">0x4</span><span class="p">,</span>	<span class="c1">///&lt; Flag for the IOCTL + sysfs + LBA backend</span>
+	<span class="n">NVM_BE_SPDK</span> <span class="o">=</span> <span class="mh">0x8</span><span class="p">,</span>	<span class="c1">///&lt; Flag for the SPDK backend</span>
 <span class="p">};</span>
-<span class="cp">#define NVM_BE_ALL (NVM_BE_IOCTL | NVM_BE_SYSFS | NVM_BE_LBA)	</span><span class="c1">///&lt; All be idents</span>
+<span class="cp">#define NVM_BE_ALL (NVM_BE_IOCTL | NVM_BE_SYSFS | NVM_BE_LBA | NVM_BE_SPDK)	</span><span class="c1">///&lt; All be idents</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * Plane-mode access for IO</span>
