@@ -169,6 +169,14 @@ struct nvm_addr {
 		} g;
 
 		struct {
+			uint64_t sectr	: 13;	///< Logical Sector in Chunk
+			uint64_t chunk	: 11;	///< Chunk in PU
+			uint64_t punit	: 3;	///< Parallel Unit (PU) in PUG
+			uint64_t pugrp	: 4;	///< Parallel Unit Group (PUG)
+			uint64_t rsvd	: 33;	///< Unmapped
+		} l;
+
+		struct {
 			uint64_t line		: 63;	///< Address line
 			uint64_t is_cached	: 1;	///< Cache hint?
 		} c;
@@ -620,6 +628,22 @@ const struct nvm_spec_ppaf_nand *nvm_dev_get_ppaf(const struct nvm_dev *dev);
  *
  */
 const struct nvm_spec_ppaf_nand_mask *nvm_dev_get_ppaf_mask(const struct nvm_dev *dev);
+
+/**
+ * Returns the LBA format of the given device
+ *
+ * @param dev Device handle obtained with `nvm_dev_open`
+ * @return On success, LBA format is returned
+ */
+const struct nvm_spec_lbaf *nvm_dev_get_lbaf(const struct nvm_dev *dev);
+
+/**
+ * Returns the logical geometry of the given device
+ *
+ * @param dev Device handle obtained with `nvm_dev_open`
+ * @return On success, logical geometry is returned
+ */
+const struct nvm_spec_lgeo *nvm_dev_get_lgeo(const struct nvm_dev *dev);
 
 /**
  * Returns the 'meta-mode' of the given device
