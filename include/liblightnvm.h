@@ -913,13 +913,14 @@ ssize_t nvm_addr_read(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs,
 		      struct nvm_ret *ret);
 
 /**
- * Checks whether the given address exceeds bounds of the given geometry
+ * Checks whether the given address exceeds bounds of the geometry of the given
+ * device
  *
  * @param addr The addr to check
- * @param geo The geometric bounds to check the given address against
+ * @param dev The device of which to check geometric bounds against
  * @returns A mask of exceeded boundaries
  */
-int nvm_addr_check(struct nvm_addr addr, const struct nvm_geo *geo);
+int nvm_addr_check(struct nvm_addr addr, const struct nvm_dev *dev);
 
 /**
  * Converts a given physical address generic-format to device-format
