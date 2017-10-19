@@ -37,9 +37,11 @@ struct nvm_dev {
 	char path[NVM_DEV_PATH_LEN];	///< Device path e.g. "/dev/nvme0n1"
 	int nsid;			///< NVME namespace identifier
 	uint8_t verid;			///< Open-Channel SSD version identifier
-	struct nvm_spec_ppaf_nand ppaf;	///< Device address format
+	struct nvm_spec_lbaf lbaf;	///< Logical Device address format
+	struct nvm_spec_ppaf_nand ppaf;	///< Physical Device address format
 	struct nvm_spec_ppaf_nand_mask mask;///< Device address format mask
 	struct nvm_geo geo;		///< Device geometry
+	struct nvm_spec_lgeo lgeo;	///< Device geometry (logical)
 	uint64_t ssw;			///< Bit-width for LBA fmt conversion
 	uint32_t mccap;			///< Media-controller capabilities
 	int pmode;			///< Default plane-mode I/O
