@@ -239,13 +239,43 @@
 <dt id="c.nvm_addr::rsvd">
 <span class="target" id="structnvm__addr_1ad84fc8fa58bd2a0e64bdbad8f25927da"></span>uint64_t <code class="descname">rsvd</code><a class="headerlink" href="#c.nvm_addr::rsvd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reserved. </p>
+<p>Unmapped. </p>
 </dd></dl>
 
 <dl class="variable">
 <dt id="c.nvm_addr::g">
-<span class="target" id="structnvm__addr_1a4edb21a84226a540df65ecbc87731224"></span>struct <a class="reference internal" href="#c.nvm_addr" title="nvm_addr">nvm_addr</a>::&#64;6::&#64;8  <code class="descname">g</code><a class="headerlink" href="#c.nvm_addr::g" title="Permalink to this definition">¶</a></dt>
+<span class="target" id="structnvm__addr_1a63dec1c230bc6e8f7ff6a12869c92720"></span>struct <a class="reference internal" href="#c.nvm_addr" title="nvm_addr">nvm_addr</a>::&#64;0::&#64;2  <code class="descname">g</code><a class="headerlink" href="#c.nvm_addr::g" title="Permalink to this definition">¶</a></dt>
 <dd><p>Address packing and geometric accessors. </p>
 </dd></dl>
+
+<dl class="variable">
+<dt id="c.nvm_addr::sectr">
+<span class="target" id="structnvm__addr_1a33bf2c6a64de40d220be3fefa117b271"></span>uint64_t <code class="descname">sectr</code><a class="headerlink" href="#c.nvm_addr::sectr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logical Sector in Chunk. </p>
+</dd></dl>
+
+<dl class="variable">
+<dt id="c.nvm_addr::chunk">
+<span class="target" id="structnvm__addr_1a055976ad96773dcb42f65bb4f5a4d984"></span>uint64_t <code class="descname">chunk</code><a class="headerlink" href="#c.nvm_addr::chunk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Chunk in PU. </p>
+</dd></dl>
+
+<dl class="variable">
+<dt id="c.nvm_addr::punit">
+<span class="target" id="structnvm__addr_1afad2b96dc7cfbf9d0612e93b212e7b11"></span>uint64_t <code class="descname">punit</code><a class="headerlink" href="#c.nvm_addr::punit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parallel Unit (PU) in PUG. </p>
+</dd></dl>
+
+<dl class="variable">
+<dt id="c.nvm_addr::pugrp">
+<span class="target" id="structnvm__addr_1a2fb9d21fa38817c7b0a4a7754dd2c670"></span>uint64_t <code class="descname">pugrp</code><a class="headerlink" href="#c.nvm_addr::pugrp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parallel Unit Group (PUG) </p>
+</dd></dl>
+
+<dl class="variable">
+<dt id="c.nvm_addr::l">
+<span class="target" id="structnvm__addr_1ad6c944a53023c7c4b574353bc92332e4"></span>struct <a class="reference internal" href="#c.nvm_addr" title="nvm_addr">nvm_addr</a>::&#64;0::&#64;3  <code class="descname">l</code><a class="headerlink" href="#c.nvm_addr::l" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="variable">
 <dt id="c.nvm_addr::line">
@@ -261,7 +291,7 @@
 
 <dl class="variable">
 <dt id="c.nvm_addr::c">
-<span class="target" id="structnvm__addr_1aecf3b30d68741d331e8a690b3a791b23"></span>struct <a class="reference internal" href="#c.nvm_addr" title="nvm_addr">nvm_addr</a>::&#64;6::&#64;9  <code class="descname">c</code><a class="headerlink" href="#c.nvm_addr::c" title="Permalink to this definition">¶</a></dt>
+<span class="target" id="structnvm__addr_1aeac7fbf43ecdc8eb75428fd8666242df"></span>struct <a class="reference internal" href="#c.nvm_addr" title="nvm_addr">nvm_addr</a>::&#64;0::&#64;4  <code class="descname">c</code><a class="headerlink" href="#c.nvm_addr::c" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="variable">
@@ -271,8 +301,8 @@
 </dd></dl>
 
 <dl class="variable">
-<dt id="c.7">
-<span class="target" id="structnvm__addr_1ab7a0e421ea2d4969a6f559a2a0fdcd59"></span>union <a class="reference internal" href="#c.nvm_addr" title="nvm_addr">nvm_addr</a>::&#64;6 <a class="reference internal" href="#c.nvm_addr" title="nvm_addr">nvm_addr</a>::&#64;<code class="descname">7</code><a class="headerlink" href="#c.7" title="Permalink to this definition">¶</a></dt>
+<dt id="c.1">
+<span class="target" id="structnvm__addr_1a8366ef619429d0c3cba56f1c9409a42d"></span>union <a class="reference internal" href="#c.nvm_addr" title="nvm_addr">nvm_addr</a>::&#64;0 <a class="reference internal" href="#c.nvm_addr" title="nvm_addr">nvm_addr</a>::&#64;<code class="descname">1</code><a class="headerlink" href="#c.1" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -362,15 +392,15 @@
 <h2>nvm_addr_check<a class="headerlink" href="#nvm-addr-check" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="c.nvm_addr_check">
-<span class="target" id="liblightnvm_8h_1a159547b8ca24e872b999877407bffda9"></span>int <code class="descname">nvm_addr_check</code><span class="sig-paren">(</span>struct  <a class="reference internal" href="#c.nvm_addr" title="nvm_addr">nvm_addr</a><em>&nbsp;addr</em>, const struct  <a class="reference internal" href="nvm_geo.html#c.nvm_geo" title="nvm_geo">nvm_geo</a>  *<em>&nbsp;geo</em><span class="sig-paren">)</span><a class="headerlink" href="#c.nvm_addr_check" title="Permalink to this definition">¶</a></dt>
-<dd><p>Checks whether the given address exceeds bounds of the given geometry. </p>
+<span class="target" id="liblightnvm_8h_1a45218aab034f28b4e5a28eafabff7a7f"></span>int <code class="descname">nvm_addr_check</code><span class="sig-paren">(</span>struct  <a class="reference internal" href="#c.nvm_addr" title="nvm_addr">nvm_addr</a><em>&nbsp;addr</em>, const struct  <a class="reference internal" href="nvm_dev.html#c.nvm_dev" title="nvm_dev">nvm_dev</a>  *<em>&nbsp;dev</em><span class="sig-paren">)</span><a class="headerlink" href="#c.nvm_addr_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks whether the given address exceeds bounds of the geometry of the given device. </p>
 <p><dl class="docutils">
 <dt><strong>Return</strong></dt>
 <dd>A mask of exceeded boundaries </dd>
 <dt><strong>Parameters</strong></dt>
 <dd><ul class="breatheparameterlist first last simple">
 <li><code class="docutils literal"><span class="pre">addr</span></code>: The addr to check </li>
-<li><code class="docutils literal"><span class="pre">geo</span></code>: The geometric bounds to check the given address against </li>
+<li><code class="docutils literal"><span class="pre">dev</span></code>: The device of which to check geometric bounds against </li>
 </ul>
 </dd>
 </dl>
