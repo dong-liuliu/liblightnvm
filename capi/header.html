@@ -230,20 +230,21 @@
 <span class="cm"> * Enumeration of cmd back-ends used by liblightnvm</span>
 <span class="cm"> */</span>
 <span class="k">enum</span> <span class="n">nvm_be_id</span> <span class="p">{</span>
-	<span class="n">NVM_BE_ANY</span> <span class="o">=</span> <span class="mh">0x0</span><span class="p">,</span>	<span class="c1">///&lt; Flag for ANY backend</span>
-	<span class="n">NVM_BE_IOCTL</span> <span class="o">=</span> <span class="mh">0x1</span><span class="p">,</span>	<span class="c1">///&lt; Flag for the IOCTL backend</span>
-	<span class="n">NVM_BE_SYSFS</span> <span class="o">=</span> <span class="mh">0x2</span><span class="p">,</span>	<span class="c1">///&lt; Flag for the IOCTL + sysfs backend</span>
-	<span class="n">NVM_BE_LBA</span> <span class="o">=</span> <span class="mh">0x4</span><span class="p">,</span>	<span class="c1">///&lt; Flag for the IOCTL + sysfs + LBA backend</span>
+	<span class="n">NVM_BE_ANY</span>	<span class="o">=</span> <span class="mh">0x0</span><span class="p">,</span>		<span class="c1">///&lt; ANY backend</span>
+	<span class="n">NVM_BE_IOCTL</span>	<span class="o">=</span> <span class="mh">0x1</span><span class="p">,</span>		<span class="c1">///&lt; IOCTL backend</span>
+	<span class="n">NVM_BE_SYSFS</span>	<span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">,</span>	<span class="c1">///&lt; IOCTL + sysfs backend</span>
+	<span class="n">NVM_BE_LBA</span>	<span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">,</span>	<span class="c1">///&lt; IOCTL + sysfs + LBA backend</span>
+	<span class="n">NVM_BE_SPDK</span>	<span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">3</span><span class="p">,</span>	<span class="c1">///&lt; SPDK backend</span>
 <span class="p">};</span>
-<span class="cp">#define NVM_BE_ALL (NVM_BE_IOCTL | NVM_BE_SYSFS | NVM_BE_LBA)	</span><span class="c1">///&lt; All be idents</span>
+<span class="cp">#define NVM_BE_ALL (NVM_BE_IOCTL | NVM_BE_SYSFS | NVM_BE_LBA | NVM_BE_SPDK)</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * Plane-mode access for IO</span>
 <span class="cm"> */</span>
 <span class="k">enum</span> <span class="n">nvm_pmode</span> <span class="p">{</span>
-	<span class="n">NVM_FLAG_PMODE_SNGL</span> <span class="o">=</span> <span class="mh">0x0</span><span class="p">,</span>	<span class="c1">///&lt; Single-plane</span>
-	<span class="n">NVM_FLAG_PMODE_DUAL</span> <span class="o">=</span> <span class="mh">0x1</span><span class="p">,</span>	<span class="c1">///&lt; Dual-plane (NVM_IO_DUAL_ACCESS)</span>
-	<span class="n">NVM_FLAG_PMODE_QUAD</span> <span class="o">=</span> <span class="mh">0x2</span>	<span class="c1">///&lt; Quad-plane (NVM_IO_QUAD_ACCESS)</span>
+	<span class="n">NVM_FLAG_PMODE_SNGL</span>	<span class="o">=</span> <span class="mh">0x0</span><span class="p">,</span>		<span class="c1">///&lt; Single-plane</span>
+	<span class="n">NVM_FLAG_PMODE_DUAL</span>	<span class="o">=</span> <span class="mh">0x1</span><span class="p">,</span>		<span class="c1">///&lt; Dual-plane</span>
+	<span class="n">NVM_FLAG_PMODE_QUAD</span>	<span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span>	<span class="c1">///&lt; Quad-plane</span>
 <span class="p">};</span>
 <span class="cp">#define NVM_FLAG_DEFAULT (NVM_FLAG_PMODE_SNGL | NVM_FLAG_SCRBL);</span>
 
@@ -251,10 +252,11 @@
 <span class="cm"> * Flags for device quirks</span>
 <span class="cm"> */</span>
 <span class="k">enum</span> <span class="n">nvm_quirks</span> <span class="p">{</span>
-	<span class="n">NVM_QUIRK_PMODE_ERASE_RUNROLL</span> <span class="o">=</span> <span class="mh">0x1</span><span class="p">,</span>
-	<span class="n">NVM_QUIRK_NSID_BY_NAMECONV</span> <span class="o">=</span> <span class="mh">0x2</span><span class="p">,</span>
-	<span class="n">NVM_QUIRK_OOB_READ_1ST4BYTES_NULL</span> <span class="o">=</span> <span class="mh">0x4</span><span class="p">,</span>
-	<span class="n">NVM_QUIRK_OOB_2LRG</span> <span class="o">=</span> <span class="mh">0x8</span>
+	<span class="n">NVM_QUIRK_PMODE_ERASE_RUNROLL</span>		<span class="o">=</span> <span class="mh">0x1</span><span class="p">,</span>
+	<span class="n">NVM_QUIRK_NSID_BY_NAMECONV</span>		<span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">,</span>
+	<span class="n">NVM_QUIRK_OOB_READ_1ST4BYTES_NULL</span>	<span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">,</span>
+	<span class="n">NVM_QUIRK_OOB_2LRG</span>			<span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">3</span><span class="p">,</span>
+	<span class="n">NVM_QUIRK_SEMI20</span>			<span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span>
 <span class="p">};</span>
 
 <span class="cm">/**</span>
@@ -284,21 +286,26 @@
 <span class="cm"> * Enumeration of pseudo meta mode</span>
 <span class="cm"> */</span>
 <span class="k">enum</span> <span class="n">nvm_meta_mode</span> <span class="p">{</span>
-	<span class="n">NVM_META_MODE_NONE</span> <span class="o">=</span> <span class="mh">0x0</span><span class="p">,</span>
-	<span class="n">NVM_META_MODE_ALPHA</span> <span class="o">=</span> <span class="mh">0x1</span><span class="p">,</span>
-	<span class="n">NVM_META_MODE_CONST</span> <span class="o">=</span> <span class="mh">0x2</span>
+	<span class="n">NVM_META_MODE_NONE</span>	<span class="o">=</span> <span class="mh">0x0</span><span class="p">,</span>
+	<span class="n">NVM_META_MODE_ALPHA</span>	<span class="o">=</span> <span class="mh">0x1</span><span class="p">,</span>
+	<span class="n">NVM_META_MODE_CONST</span>	<span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span>
 <span class="p">};</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * Enumeration of device bounds</span>
 <span class="cm"> */</span>
 <span class="k">enum</span> <span class="n">nvm_bounds</span> <span class="p">{</span>
-	<span class="n">NVM_BOUNDS_CHANNEL</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-	<span class="n">NVM_BOUNDS_LUN</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
-	<span class="n">NVM_BOUNDS_PLANE</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
-	<span class="n">NVM_BOUNDS_BLOCK</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
-	<span class="n">NVM_BOUNDS_PAGE</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span>
-	<span class="n">NVM_BOUNDS_SECTOR</span> <span class="o">=</span> <span class="mi">32</span>
+	<span class="n">NVM_BOUNDS_CHANNEL</span>	<span class="o">=</span> <span class="mh">0x1</span><span class="p">,</span>
+	<span class="n">NVM_BOUNDS_LUN</span>		<span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">,</span>
+	<span class="n">NVM_BOUNDS_PLANE</span>	<span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">,</span>
+	<span class="n">NVM_BOUNDS_BLOCK</span>	<span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">3</span><span class="p">,</span>
+	<span class="n">NVM_BOUNDS_PAGE</span>		<span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">,</span>
+	<span class="n">NVM_BOUNDS_SECTOR</span>	<span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">5</span><span class="p">,</span>
+
+	<span class="n">NVM_BOUNDS_PUGRP</span>	<span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">6</span><span class="p">,</span>
+	<span class="n">NVM_BOUNDS_PUNIT</span>	<span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">7</span><span class="p">,</span>
+	<span class="n">NVM_BOUNDS_CHUNK</span>	<span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">,</span>
+	<span class="n">NVM_BOUNDS_SECTR</span>	<span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">9</span>
 <span class="p">};</span>
 
 <span class="cm">/**</span>
@@ -310,96 +317,6 @@
 <span class="p">};</span>
 
 <span class="cm">/**</span>
-<span class="cm"> * @struct nvm_cmd_vuser</span>
-<span class="cm"> * @struct nvm_cmd_vadmin</span>
-<span class="cm"> * @struct nvm_cmd_user</span>
-<span class="cm"> * @struct nvm_cmd_admin</span>
-<span class="cm"> */</span>
-
-<span class="cm">/**</span>
-<span class="cm"> * Encapsulation of lowest-level user and admin commands</span>
-<span class="cm"> */</span>
-<span class="k">struct</span> <span class="n">nvm_cmd</span> <span class="p">{</span>
-	<span class="k">union</span> <span class="p">{</span>
-		<span class="k">struct</span> <span class="p">{</span>
-			<span class="kt">uint8_t</span> <span class="n">opcode</span><span class="p">;</span>
-			<span class="kt">uint8_t</span> <span class="n">flags</span><span class="p">;</span>
-			<span class="kt">uint16_t</span> <span class="n">control</span><span class="p">;</span>
-			<span class="kt">uint16_t</span> <span class="n">nppas</span><span class="p">;</span>
-			<span class="kt">uint16_t</span> <span class="n">rsvd</span><span class="p">;</span>
-			<span class="kt">uint64_t</span> <span class="n">metadata</span><span class="p">;</span>
-			<span class="kt">uint64_t</span> <span class="n">addr</span><span class="p">;</span>
-			<span class="kt">uint64_t</span> <span class="n">ppa_list</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">metadata_len</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">data_len</span><span class="p">;</span>
-			<span class="kt">uint64_t</span> <span class="n">status</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">result</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">rsvd3</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
-		<span class="p">}</span> <span class="n">vuser</span><span class="p">;</span>	<span class="c1">///&lt; Common fields for vector user commands</span>
-
-		<span class="k">struct</span> <span class="p">{</span>
-			<span class="kt">uint8_t</span> <span class="n">opcode</span><span class="p">;</span>
-			<span class="kt">uint8_t</span> <span class="n">flags</span><span class="p">;</span>
-			<span class="kt">uint8_t</span> <span class="n">rsvd</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
-			<span class="kt">uint32_t</span> <span class="n">nsid</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">cdw2</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">cdw3</span><span class="p">;</span>
-			<span class="kt">uint64_t</span> <span class="n">metadata</span><span class="p">;</span>
-			<span class="kt">uint64_t</span> <span class="n">addr</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">metadata_len</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">data_len</span><span class="p">;</span>
-			<span class="kt">uint64_t</span> <span class="n">ppa_list</span><span class="p">;</span>
-			<span class="kt">uint16_t</span> <span class="n">nppas</span><span class="p">;</span>
-			<span class="kt">uint16_t</span> <span class="n">control</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">cdw13</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">cdw14</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">cdw15</span><span class="p">;</span>
-			<span class="kt">uint64_t</span> <span class="n">status</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">result</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">timeout_ms</span><span class="p">;</span>
-		<span class="p">}</span> <span class="n">vadmin</span><span class="p">;</span>	<span class="c1">///&lt; Common fields for vector admin commands</span>
-
-		<span class="k">struct</span> <span class="p">{</span>
-			<span class="kt">uint8_t</span> <span class="n">opcode</span><span class="p">;</span>
-			<span class="kt">uint8_t</span> <span class="n">flags</span><span class="p">;</span>
-			<span class="kt">uint16_t</span> <span class="n">rsvd1</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">nsid</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">cdw2</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">cdw3</span><span class="p">;</span>
-			<span class="kt">uint64_t</span> <span class="n">metadata</span><span class="p">;</span>
-			<span class="kt">uint64_t</span> <span class="n">addr</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">metadata_len</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">data_len</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">cdw10</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">cdw11</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">cdw12</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">cdw13</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">cdw14</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">cdw15</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">timeout_ms</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">result</span><span class="p">;</span>
-		<span class="p">}</span> <span class="n">admin</span><span class="p">;</span>	<span class="c1">///&lt; Common fields for admin commands</span>
-
-		<span class="k">struct</span> <span class="p">{</span>
-			<span class="kt">uint8_t</span> <span class="n">opcode</span><span class="p">;</span>
-			<span class="kt">uint8_t</span> <span class="n">flags</span><span class="p">;</span>
-			<span class="kt">uint16_t</span> <span class="n">control</span><span class="p">;</span>
-			<span class="kt">uint16_t</span> <span class="n">nblocks</span><span class="p">;</span>
-			<span class="kt">uint16_t</span> <span class="n">rsvd</span><span class="p">;</span>
-			<span class="kt">uint64_t</span> <span class="n">metadata</span><span class="p">;</span>
-			<span class="kt">uint64_t</span> <span class="n">addr</span><span class="p">;</span>
-			<span class="kt">uint64_t</span> <span class="n">slba</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">dsmgmt</span><span class="p">;</span>
-			<span class="kt">uint32_t</span> <span class="n">reftag</span><span class="p">;</span>
-			<span class="kt">uint16_t</span> <span class="n">apptag</span><span class="p">;</span>
-			<span class="kt">uint16_t</span> <span class="n">appmask</span><span class="p">;</span>
-		<span class="p">}</span> <span class="n">user</span><span class="p">;</span>		<span class="c1">///&lt; Common fields for user commands</span>
-
-		<span class="kt">uint32_t</span> <span class="n">cdw</span><span class="p">[</span><span class="mi">20</span><span class="p">];</span>	<span class="c1">///&lt; Command as array of dwords</span>
-	<span class="p">};</span>
-<span class="p">};</span>
-
-<span class="cm">/**</span>
 <span class="cm"> * Obtain string representation of the given plane-mode</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param pmode The plane-mode to obtain string representation of</span>
@@ -408,71 +325,6 @@
 <span class="cm"> * &quot;UNKN&quot;.</span>
 <span class="cm"> */</span>
 <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="nf">nvm_pmode_str</span><span class="p">(</span><span class="kt">int</span> <span class="n">pmode</span><span class="p">);</span>
-
-<span class="cm">/**</span>
-<span class="cm"> * Execute an user command on the given device</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param dev Device handle obtained with `nvm_dev_open`</span>
-<span class="cm"> * @param cmd The command to execute</span>
-<span class="cm"> * @param ret Pointer to struct to fill with lower-level result-codes</span>
-<span class="cm"> *</span>
-<span class="cm"> * @returns On success, 0 is returned. On error, -1 is returned, `errno` set to</span>
-<span class="cm"> * indicate the error and ret filled with lower-level result codes</span>
-<span class="cm"> */</span>
-<span class="kt">int</span> <span class="nf">nvm_cmd_user</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_cmd</span> <span class="o">*</span><span class="n">cmd</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_ret</span> <span class="o">*</span><span class="n">ret</span><span class="p">);</span>
-
-<span class="cm">/**</span>
-<span class="cm"> * Execute an admin command on the given device</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param dev Device handle obtained with `nvm_dev_open`</span>
-<span class="cm"> * @param cmd The command to execute</span>
-<span class="cm"> * @param ret Pointer to struct to fill with lower-level result-codes</span>
-<span class="cm"> *</span>
-<span class="cm"> * @returns On success, 0 is returned. On error, -1 is returned, `errno` set to</span>
-<span class="cm"> * indicate the error and ret filled with lower-level result codes</span>
-<span class="cm"> */</span>
-<span class="kt">int</span> <span class="nf">nvm_cmd_admin</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_cmd</span> <span class="o">*</span><span class="n">cmd</span><span class="p">,</span>
-		  <span class="k">struct</span> <span class="n">nvm_ret</span> <span class="o">*</span><span class="n">ret</span><span class="p">);</span>
-
-<span class="cm">/**</span>
-<span class="cm"> * Execute a vector user command on the given device</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param dev Device handle obtained with `nvm_dev_open`</span>
-<span class="cm"> * @param cmd The command to execute</span>
-<span class="cm"> * @param ret Pointer to struct to fill with lower-level result-codes</span>
-<span class="cm"> *</span>
-<span class="cm"> * @returns On success, 0 is returned. On error, -1 is returned, `errno` set to</span>
-<span class="cm"> * indicate the error and ret filled with lower-level result codes</span>
-<span class="cm"> */</span>
-<span class="kt">int</span> <span class="nf">nvm_cmd_vuser</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_cmd</span> <span class="o">*</span><span class="n">cmd</span><span class="p">,</span>
-		  <span class="k">struct</span> <span class="n">nvm_ret</span> <span class="o">*</span><span class="n">ret</span><span class="p">);</span>
-
-<span class="cm">/**</span>
-<span class="cm"> * Execute a vector admin command on the given device</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param dev Device handle obtained with `nvm_dev_open`</span>
-<span class="cm"> * @param cmd The command to execute</span>
-<span class="cm"> * @param ret Pointer to struct to fill with lower-level result-codes</span>
-<span class="cm"> *</span>
-<span class="cm"> * @returns On success, 0 is returned. On error, -1 is returned, `errno` set to</span>
-<span class="cm"> * indicate the error and ret filled with lower-level result codes</span>
-<span class="cm"> */</span>
-<span class="kt">int</span> <span class="nf">nvm_cmd_vadmin</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_cmd</span> <span class="o">*</span><span class="n">cmd</span><span class="p">,</span>
-		   <span class="k">struct</span> <span class="n">nvm_ret</span> <span class="o">*</span><span class="n">ret</span><span class="p">);</span>
-
-<span class="cm">/**</span>
-<span class="cm"> * Prints a text-representation of the given command</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param cmd The command to print</span>
-<span class="cm"> */</span>
-<span class="kt">void</span> <span class="nf">nvm_cmd_pr</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_cmd</span> <span class="o">*</span><span class="n">cmd</span><span class="p">);</span>
-
-<span class="cm">/**</span>
-<span class="cm"> * Prints a textual presentation of the vuser par of the given command</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param cmd The command to print</span>
-<span class="cm"> */</span>
-<span class="kt">void</span> <span class="nf">nvm_cmd_vuser_pr</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_cmd</span> <span class="o">*</span><span class="n">cmd</span><span class="p">);</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * Encapsulation of generic physical nvm addressing</span>
@@ -490,53 +342,79 @@
 <span class="cm">		 * Address packing and geometric accessors</span>
 <span class="cm">		 */</span>
 		<span class="k">struct</span> <span class="p">{</span>
-			<span class="kt">uint64_t</span> <span class="nl">blk</span>	<span class="p">:</span> <span class="mi">16</span><span class="p">;</span>	<span class="c1">///&lt; Block address</span>
-			<span class="kt">uint64_t</span> <span class="nl">pg</span>	<span class="p">:</span> <span class="mi">16</span><span class="p">;</span>	<span class="c1">///&lt; Page address</span>
 			<span class="kt">uint64_t</span> <span class="nl">sec</span>	<span class="p">:</span> <span class="mi">8</span><span class="p">;</span>	<span class="c1">///&lt; Sector address</span>
+			<span class="kt">uint64_t</span> <span class="nl">pg</span>	<span class="p">:</span> <span class="mi">16</span><span class="p">;</span>	<span class="c1">///&lt; Page address</span>
 			<span class="kt">uint64_t</span> <span class="nl">pl</span>	<span class="p">:</span> <span class="mi">8</span><span class="p">;</span>	<span class="c1">///&lt; Plane address</span>
+			<span class="kt">uint64_t</span> <span class="nl">blk</span>	<span class="p">:</span> <span class="mi">16</span><span class="p">;</span>	<span class="c1">///&lt; Block address</span>
 			<span class="kt">uint64_t</span> <span class="nl">lun</span>	<span class="p">:</span> <span class="mi">8</span><span class="p">;</span>	<span class="c1">///&lt; LUN address</span>
-			<span class="kt">uint64_t</span> <span class="nl">ch</span>	<span class="p">:</span> <span class="mi">7</span><span class="p">;</span>	<span class="c1">///&lt; Channel address</span>
-			<span class="kt">uint64_t</span> <span class="nl">rsvd</span>	<span class="p">:</span> <span class="mi">1</span><span class="p">;</span>	<span class="c1">///&lt; Reserved</span>
+			<span class="kt">uint64_t</span> <span class="nl">ch</span>	<span class="p">:</span> <span class="mi">8</span><span class="p">;</span>	<span class="c1">///&lt; Channel address</span>
 		<span class="p">}</span> <span class="n">g</span><span class="p">;</span>
 
 		<span class="k">struct</span> <span class="p">{</span>
-			<span class="kt">uint64_t</span> <span class="nl">line</span>		<span class="p">:</span> <span class="mi">63</span><span class="p">;</span>	<span class="c1">///&lt; Address line</span>
-			<span class="kt">uint64_t</span> <span class="nl">is_cached</span>	<span class="p">:</span> <span class="mi">1</span><span class="p">;</span>	<span class="c1">///&lt; Cache hint?</span>
-		<span class="p">}</span> <span class="n">c</span><span class="p">;</span>
+			<span class="kt">uint64_t</span> <span class="nl">sectr</span>	<span class="p">:</span> <span class="mi">32</span><span class="p">;</span>	<span class="c1">///&lt; Logical Sector in Chunk</span>
+			<span class="kt">uint64_t</span> <span class="nl">chunk</span>	<span class="p">:</span> <span class="mi">16</span><span class="p">;</span>	<span class="c1">///&lt; Chunk in PU</span>
+			<span class="kt">uint64_t</span> <span class="nl">punit</span>	<span class="p">:</span> <span class="mi">8</span><span class="p">;</span>	<span class="c1">///&lt; Parallel Unit (PU) in PUG</span>
+			<span class="kt">uint64_t</span> <span class="nl">pugrp</span>	<span class="p">:</span> <span class="mi">8</span><span class="p">;</span>	<span class="c1">///&lt; Parallel Unit Group (PUG)</span>
+		<span class="p">}</span> <span class="n">l</span><span class="p">;</span>
 
-		<span class="kt">uint64_t</span> <span class="n">ppa</span><span class="p">;</span>				<span class="c1">///&lt; Address as ppa</span>
+		<span class="kt">uint64_t</span> <span class="n">ppa</span><span class="p">;</span>			<span class="c1">///&lt; Address as raw value</span>
+
+		<span class="kt">uint64_t</span> <span class="n">val</span><span class="p">;</span>			<span class="c1">///&lt; Address as raw value</span>
 	<span class="p">};</span>
 <span class="p">};</span>
 
 <span class="cm">/**</span>
-<span class="cm"> * Representation of device and virtual block geometry</span>
+<span class="cm"> * Representation of device geometry</span>
 <span class="cm"> *</span>
-<span class="cm"> * @see nvm_dev_get_geo, nvm_vblk_get_geo</span>
+<span class="cm"> * @see nvm_dev_get_geo</span>
 <span class="cm"> */</span>
 <span class="k">struct</span> <span class="n">nvm_geo</span> <span class="p">{</span>
-	<span class="kt">size_t</span> <span class="n">nchannels</span><span class="p">;</span>	<span class="c1">///&lt; Number of channels on device</span>
-	<span class="kt">size_t</span> <span class="n">nluns</span><span class="p">;</span>		<span class="c1">///&lt; Number of LUNs per channel</span>
-	<span class="kt">size_t</span> <span class="n">nplanes</span><span class="p">;</span>		<span class="c1">///&lt; Number of planes per LUN</span>
-	<span class="kt">size_t</span> <span class="n">nblocks</span><span class="p">;</span>		<span class="c1">///&lt; Number of blocks per plane</span>
-	<span class="kt">size_t</span> <span class="n">npages</span><span class="p">;</span>		<span class="c1">///&lt; Number of pages per block</span>
-	<span class="kt">size_t</span> <span class="n">nsectors</span><span class="p">;</span>	<span class="c1">///&lt; Number of sectors per page</span>
+	<span class="k">union</span> <span class="p">{</span>
 
-	<span class="kt">size_t</span> <span class="n">page_nbytes</span><span class="p">;</span>	<span class="c1">///&lt; Number of bytes per page</span>
-	<span class="kt">size_t</span> <span class="n">sector_nbytes</span><span class="p">;</span>	<span class="c1">///&lt; Number of bytes per sector</span>
-	<span class="kt">size_t</span> <span class="n">meta_nbytes</span><span class="p">;</span>	<span class="c1">///&lt; Number of bytes for out-of-bound / metadata</span>
+		<span class="cm">/**</span>
+<span class="cm">		 * Spec 2.0</span>
+<span class="cm">		 */</span>
+		<span class="k">struct</span> <span class="p">{</span>
+			<span class="kt">size_t</span> <span class="n">npugrp</span><span class="p">;</span>		<span class="c1">///&lt; # Parallel Unit Groups</span>
+			<span class="kt">size_t</span> <span class="n">npunit</span><span class="p">;</span>		<span class="c1">///&lt; # Parallel Units in PUG</span>
+			<span class="kt">size_t</span> <span class="n">nchunk</span><span class="p">;</span>		<span class="c1">///&lt; # Chunks in PU</span>
 
-	<span class="kt">size_t</span> <span class="n">tbytes</span><span class="p">;</span>		<span class="c1">///&lt; Total number of bytes in geometry</span>
+			<span class="kt">size_t</span> <span class="n">nsectr</span><span class="p">;</span>		<span class="c1">///&lt; # Sectors per CNK</span>
+			<span class="kt">size_t</span> <span class="n">nbytes</span><span class="p">;</span>		<span class="c1">///&lt; # Bytes per SECTOR</span>
+			<span class="kt">size_t</span> <span class="n">nbytes_oob</span><span class="p">;</span>	<span class="c1">///&lt; # Bytes per SECTOR in OOB</span>
+		<span class="p">};</span>
+
+		<span class="cm">/**</span>
+<span class="cm">		 * Spec 1.2</span>
+<span class="cm">		 */</span>
+		<span class="k">struct</span> <span class="p">{</span>
+			<span class="kt">size_t</span> <span class="n">nchannels</span><span class="p">;</span>	<span class="c1">///&lt; # of channels on device</span>
+			<span class="kt">size_t</span> <span class="n">nluns</span><span class="p">;</span>		<span class="c1">///&lt; # of LUNs per channel</span>
+			<span class="kt">size_t</span> <span class="n">nblocks</span><span class="p">;</span>		<span class="c1">///&lt; # of blocks per plane</span>
+			
+			<span class="kt">size_t</span> <span class="n">nsectors</span><span class="p">;</span>	<span class="c1">///&lt; # of sectors per page</span>
+			<span class="kt">size_t</span> <span class="n">sector_nbytes</span><span class="p">;</span>	<span class="c1">///&lt; # of bytes per sector</span>
+			<span class="kt">size_t</span> <span class="n">meta_nbytes</span><span class="p">;</span>	<span class="c1">///&lt; # of bytes for OOB</span>
+
+			<span class="kt">size_t</span> <span class="n">nplanes</span><span class="p">;</span>		<span class="c1">///&lt; # of planes per LUN</span>
+			<span class="kt">size_t</span> <span class="n">npages</span><span class="p">;</span>		<span class="c1">///&lt; # of pages per block</span>
+			<span class="kt">size_t</span> <span class="n">page_nbytes</span><span class="p">;</span>	<span class="c1">///&lt; # of bytes per page</span>
+		<span class="p">};</span>
+	<span class="p">};</span>
+	
+	<span class="kt">size_t</span> <span class="n">tbytes</span><span class="p">;</span>				<span class="c1">///&lt; Total # bytes in geometry</span>
+	<span class="kt">int</span> <span class="n">verid</span><span class="p">;</span>				<span class="c1">///&lt; Associated dev verid</span>
 <span class="p">};</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * Representation of valid values of bad-block-table states</span>
 <span class="cm"> */</span>
 <span class="k">enum</span> <span class="n">nvm_bbt_state</span> <span class="p">{</span>
-	<span class="n">NVM_BBT_FREE</span> <span class="o">=</span> <span class="mh">0x0</span><span class="p">,</span>	<span class="c1">///&lt; Block is free AKA good</span>
-	<span class="n">NVM_BBT_BAD</span> <span class="o">=</span> <span class="mh">0x1</span><span class="p">,</span>	<span class="c1">///&lt; Block is bad</span>
-	<span class="n">NVM_BBT_GBAD</span> <span class="o">=</span> <span class="mh">0x2</span><span class="p">,</span>	<span class="c1">///&lt; Block has grown bad</span>
-	<span class="n">NVM_BBT_DMRK</span> <span class="o">=</span> <span class="mh">0x4</span><span class="p">,</span>	<span class="c1">///&lt; Block has been marked by device side</span>
-	<span class="n">NVM_BBT_HMRK</span> <span class="o">=</span> <span class="mh">0x8</span>	<span class="c1">///&lt; Block has been marked by host side</span>
+	<span class="n">NVM_BBT_FREE</span>	<span class="o">=</span> <span class="mh">0x0</span><span class="p">,</span>		<span class="c1">///&lt; Block is free AKA good</span>
+	<span class="n">NVM_BBT_BAD</span>	<span class="o">=</span> <span class="mh">0x1</span><span class="p">,</span>		<span class="c1">///&lt; Block is bad</span>
+	<span class="n">NVM_BBT_GBAD</span>	<span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">,</span>	<span class="c1">///&lt; Block marked as grown bad</span>
+	<span class="n">NVM_BBT_DMRK</span>	<span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">,</span>	<span class="c1">///&lt; Block marked by device side</span>
+	<span class="n">NVM_BBT_HMRK</span>	<span class="o">=</span> <span class="mh">0x1</span> <span class="o">&lt;&lt;</span> <span class="mi">3</span>	<span class="c1">///&lt; Block marked by host side</span>
 <span class="p">};</span>
 
 <span class="cm">/**</span>
@@ -556,6 +434,94 @@
 	<span class="kt">uint32_t</span> <span class="n">nhmrk</span><span class="p">;</span>		<span class="c1">///&lt; # of of host reserved/marked blocks</span>
 	<span class="kt">uint8_t</span> <span class="n">blks</span><span class="p">[];</span>		<span class="c1">///&lt; Array of block status for each block in LUN</span>
 <span class="p">};</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * Execute an Open-Channel 1.2 identify / Open-Channel 2.0 geometry command</span>
+<span class="cm"> *</span>
+<span class="cm"> * NOTE: Caller is reponsible for de-allocating the returned structure</span>
+<span class="cm"> *</span>
+<span class="cm"> * @return On success, pointer identify structure is returned. On error, NULL is</span>
+<span class="cm"> * returned and `errno` set to indicate the error and ret filled with</span>
+<span class="cm"> * lower-level result codes</span>
+<span class="cm"> */</span>
+<span class="k">struct</span> <span class="n">nvm_spec_idfy</span> <span class="o">*</span><span class="nf">nvm_cmd_idfy</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_ret</span> <span class="o">*</span><span class="n">ret</span><span class="p">);</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * Execute an Open-Channel 2.0 report chunk command</span>
+<span class="cm"> *</span>
+<span class="cm"> * NOTE: Caller is responsible for de-allocating the returned structure</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param dev Device handle obtained with `nvm_dev_open`</span>
+<span class="cm"> * report for</span>
+<span class="cm"> * @param opts Reporting options, see `enum nvm_spec_rprt_opts`</span>
+<span class="cm"> *</span>
+<span class="cm"> * @return On success, pointer report chunk structure is returned. On error,</span>
+<span class="cm"> * NULL is returned and `errno` set to indicate the error and ret filled with</span>
+<span class="cm"> * lower-level result codes</span>
+<span class="cm"> */</span>
+<span class="k">struct</span> <span class="n">nvm_spec_rprt</span> <span class="o">*</span><span class="nf">nvm_cmd_rprt</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_addr</span> <span class="o">*</span><span class="n">addr</span><span class="p">,</span>
+				   <span class="kt">int</span> <span class="n">opt</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_ret</span> <span class="o">*</span><span class="n">ret</span><span class="p">);</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * Execute an Open-Channel 1.2 get bad-block-table</span>
+<span class="cm"> *</span>
+<span class="cm"> * NOTE: Caller is responsible for de-allocating the returned structure</span>
+<span class="cm"> *</span>
+<span class="cm"> * @return On success, pointer to bad block table is returned. On error, NULL is</span>
+<span class="cm"> * returned and `errno` set to indicate the error and ret filled with</span>
+<span class="cm"> * lower-level result codes</span>
+<span class="cm"> */</span>
+<span class="k">struct</span> <span class="n">nvm_spec_bbt</span> <span class="o">*</span><span class="nf">nvm_cmd_gbbt</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_addr</span> <span class="n">addr</span><span class="p">,</span>
+				  <span class="k">struct</span> <span class="n">nvm_ret</span> <span class="o">*</span><span class="n">ret</span><span class="p">);</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * Execute an Open-Channel 1.2 get bad block table command</span>
+<span class="cm"> *</span>
+<span class="cm"> * NOTE: Caller is responsible for de-allocating the returned structure</span>
+<span class="cm"> *</span>
+<span class="cm"> * @return On success, pointer to bad block table is returned. On error, NULL is</span>
+<span class="cm"> * returned and `errno` set to indicate the error and ret filled with</span>
+<span class="cm"> * lower-level result codes</span>
+<span class="cm"> */</span>
+<span class="kt">int</span> <span class="nf">nvm_cmd_sbbt</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_addr</span> <span class="o">*</span><span class="n">addrs</span><span class="p">,</span> <span class="kt">int</span> <span class="n">naddrs</span><span class="p">,</span>
+		 <span class="kt">uint16_t</span> <span class="n">flags</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_ret</span> <span class="o">*</span><span class="n">ret</span><span class="p">);</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * Execute an Open-Channel 1.2 erase / Open-Channel 2.0 reset command</span>
+<span class="cm"> *</span>
+<span class="cm"> * @return On success, 0 is returned. On error, -1 is returned and `errno` set</span>
+<span class="cm"> * to indicate the error and ret filled with lower-level result codes</span>
+<span class="cm"> */</span>
+<span class="kt">int</span> <span class="nf">nvm_cmd_erase</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_addr</span> <span class="n">addrs</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">naddrs</span><span class="p">,</span>
+		  <span class="kt">uint16_t</span> <span class="n">flags</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_ret</span> <span class="o">*</span><span class="n">ret</span><span class="p">);</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * Execute an Open-Channel 1.2 / 2.0 write command</span>
+<span class="cm"> *</span>
+<span class="cm"> * @return On success, 0 is returned. On error, -1 is returned and `errno` set</span>
+<span class="cm"> * to indicate the error and ret filled with lower-level result codes</span>
+<span class="cm"> */</span>
+<span class="kt">int</span> <span class="nf">nvm_cmd_write</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_addr</span> <span class="n">addrs</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">naddrs</span><span class="p">,</span>
+		  <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">meta</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">flags</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_ret</span> <span class="o">*</span><span class="n">ret</span><span class="p">);</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * Execute an Open-Channel 1.2 / 2.0 read command</span>
+<span class="cm"> *</span>
+<span class="cm"> * @return On success, 0 is returned. On error, -1 is returned and `errno` set</span>
+<span class="cm"> * to indicate the error and ret filled with lower-level result codes</span>
+<span class="cm"> */</span>
+<span class="kt">int</span> <span class="nf">nvm_cmd_read</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_addr</span> <span class="n">addrs</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">naddrs</span><span class="p">,</span>
+		 <span class="kt">void</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">meta</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">flags</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_ret</span> <span class="o">*</span><span class="n">ret</span><span class="p">);</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * Execute an Open-Channel 2.0 copy command</span>
+<span class="cm"> *</span>
+<span class="cm"> * @return On success, 0 is returned. On error, -1 is returned and `errno` set</span>
+<span class="cm"> * to indicate the error and ret filled with lower-level result codes</span>
+<span class="cm"> */</span>
+<span class="kt">int</span> <span class="nf">nvm_cmd_copy</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_addr</span> <span class="n">src</span><span class="p">[],</span>
+		 <span class="k">struct</span> <span class="n">nvm_addr</span> <span class="n">dst</span><span class="p">[],</span> <span class="kt">int</span> <span class="n">naddrs</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">flags</span><span class="p">,</span>
+		 <span class="k">struct</span> <span class="n">nvm_ret</span> <span class="o">*</span><span class="n">ret</span><span class="p">);</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * @returns the &quot;major&quot; version of the library</span>
@@ -862,6 +828,14 @@
 <span class="k">const</span> <span class="k">struct</span> <span class="n">nvm_spec_ppaf_nand_mask</span> <span class="o">*</span><span class="nf">nvm_dev_get_ppaf_mask</span><span class="p">(</span><span class="k">const</span> <span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span>
 
 <span class="cm">/**</span>
+<span class="cm"> * Returns the LBA format of the given device</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param dev Device handle obtained with `nvm_dev_open`</span>
+<span class="cm"> * @return On success, LBA format is returned</span>
+<span class="cm"> */</span>
+<span class="k">const</span> <span class="k">struct</span> <span class="n">nvm_spec_lbaf</span> <span class="o">*</span><span class="nf">nvm_dev_get_lbaf</span><span class="p">(</span><span class="k">const</span> <span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span>
+
+<span class="cm">/**</span>
 <span class="cm"> * Returns the &#39;meta-mode&#39; of the given device</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param dev Device handle obtained with `nvm_dev_open`</span>
@@ -979,6 +953,15 @@
 <span class="cm"> * @returns The geometry (struct nvm_geo) of given device handle</span>
 <span class="cm"> */</span>
 <span class="k">const</span> <span class="k">struct</span> <span class="n">nvm_geo</span> <span class="o">*</span><span class="nf">nvm_dev_get_geo</span><span class="p">(</span><span class="k">const</span> <span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * Returns the minimum write size, in number of sectors, for the given device.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param dev Device handle obtained with `nvm_dev_open`</span>
+<span class="cm"> *</span>
+<span class="cm"> * @returns The spec. 2.0 defined minimum write size</span>
+<span class="cm"> */</span>
+<span class="kt">uint32_t</span> <span class="nf">nvm_dev_get_ws_min</span><span class="p">(</span><span class="k">const</span> <span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * Allocate a buffer aligned to match the given geometry</span>
@@ -1129,13 +1112,21 @@
 		      <span class="k">struct</span> <span class="n">nvm_ret</span> <span class="o">*</span><span class="n">ret</span><span class="p">);</span>
 
 <span class="cm">/**</span>
-<span class="cm"> * Checks whether the given address exceeds bounds of the given geometry</span>
+<span class="cm"> * Checks whether the given address exceeds bounds of the geometry of the given</span>
+<span class="cm"> * device</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param addr The addr to check</span>
-<span class="cm"> * @param geo The geometric bounds to check the given address against</span>
+<span class="cm"> * @param dev The device of which to check geometric bounds against</span>
 <span class="cm"> * @returns A mask of exceeded boundaries</span>
 <span class="cm"> */</span>
-<span class="kt">int</span> <span class="nf">nvm_addr_check</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_addr</span> <span class="n">addr</span><span class="p">,</span> <span class="k">const</span> <span class="k">struct</span> <span class="n">nvm_geo</span> <span class="o">*</span><span class="n">geo</span><span class="p">);</span>
+<span class="kt">int</span> <span class="nf">nvm_addr_check</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_addr</span> <span class="n">addr</span><span class="p">,</span> <span class="k">const</span> <span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * Compute log page offset (lpo) for the get-log-page command for chunk information</span>
+<span class="cm"> *</span>
+<span class="cm"> * @returns the log page offset (lpo) for the given addr</span>
+<span class="cm"> */</span>
+<span class="kt">uint64_t</span> <span class="nf">nvm_addr_to_lpo</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_addr</span> <span class="n">addr</span><span class="p">);</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * Converts a given physical address generic-format to device-format</span>
@@ -1216,10 +1207,18 @@
 <span class="cm"> */</span>
 <span class="kt">void</span> <span class="nf">nvm_addr_pr</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_addr</span> <span class="n">addr</span><span class="p">);</span>
 
+<span class="kt">void</span> <span class="nf">nvm_addr_prl</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_addr</span> <span class="n">addr</span><span class="p">);</span>
+
 <span class="cm">/**</span>
 <span class="cm"> * Prints a humanly readable representation of the given list of addresses</span>
 <span class="cm"> */</span>
 <span class="kt">void</span> <span class="nf">nvm_addr_prn</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_addr</span> <span class="o">*</span><span class="n">addr</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">naddrs</span><span class="p">);</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * Prints a humanly readable representation of the given list of addresses using</span>
+<span class="cm"> * representation as per the given device geotry</span>
+<span class="cm"> */</span>
+<span class="kt">void</span> <span class="nf">nvm_addr_print</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_addr</span> <span class="o">*</span><span class="n">addr</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">naddrs</span><span class="p">,</span> <span class="k">const</span> <span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * Allocate a virtual block, spanning a given set of physical blocks</span>
