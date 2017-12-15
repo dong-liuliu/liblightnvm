@@ -382,11 +382,25 @@
 			<span class="kt">size_t</span> <span class="n">nsectr</span><span class="p">;</span>		<span class="c1">///&lt; # Sectors per CNK</span>
 			<span class="kt">size_t</span> <span class="n">nbytes</span><span class="p">;</span>		<span class="c1">///&lt; # Bytes per SECTOR</span>
 			<span class="kt">size_t</span> <span class="n">nbytes_oob</span><span class="p">;</span>	<span class="c1">///&lt; # Bytes per SECTOR in OOB</span>
-		<span class="p">};</span>
+		<span class="p">}</span> <span class="n">l</span><span class="p">;</span>
 
 		<span class="cm">/**</span>
 <span class="cm">		 * Spec 1.2</span>
 <span class="cm">		 */</span>
+		<span class="k">struct</span> <span class="p">{</span>
+			<span class="kt">size_t</span> <span class="n">nchannels</span><span class="p">;</span>	<span class="c1">///&lt; # of channels on device</span>
+			<span class="kt">size_t</span> <span class="n">nluns</span><span class="p">;</span>		<span class="c1">///&lt; # of LUNs per channel</span>
+			<span class="kt">size_t</span> <span class="n">nblocks</span><span class="p">;</span>		<span class="c1">///&lt; # of blocks per plane</span>
+			
+			<span class="kt">size_t</span> <span class="n">nsectors</span><span class="p">;</span>	<span class="c1">///&lt; # of sectors per page</span>
+			<span class="kt">size_t</span> <span class="n">sector_nbytes</span><span class="p">;</span>	<span class="c1">///&lt; # of bytes per sector</span>
+			<span class="kt">size_t</span> <span class="n">meta_nbytes</span><span class="p">;</span>	<span class="c1">///&lt; # of bytes for OOB</span>
+
+			<span class="kt">size_t</span> <span class="n">nplanes</span><span class="p">;</span>		<span class="c1">///&lt; # of planes per LUN</span>
+			<span class="kt">size_t</span> <span class="n">npages</span><span class="p">;</span>		<span class="c1">///&lt; # of pages per block</span>
+			<span class="kt">size_t</span> <span class="n">page_nbytes</span><span class="p">;</span>	<span class="c1">///&lt; # of bytes per page</span>
+		<span class="p">}</span> <span class="n">g</span><span class="p">;</span>
+
 		<span class="k">struct</span> <span class="p">{</span>
 			<span class="kt">size_t</span> <span class="n">nchannels</span><span class="p">;</span>	<span class="c1">///&lt; # of channels on device</span>
 			<span class="kt">size_t</span> <span class="n">nluns</span><span class="p">;</span>		<span class="c1">///&lt; # of LUNs per channel</span>
@@ -463,6 +477,13 @@
 				   <span class="kt">int</span> <span class="n">opt</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_ret</span> <span class="o">*</span><span class="n">ret</span><span class="p">);</span>
 
 <span class="cm">/**</span>
+<span class="cm"> * Find an arbitrary chunk in the given state on the given device</span>
+<span class="cm"> *</span>
+<span class="cm"> * @returns 0 on success, -1 on error and errno set to indicate the error.</span>
+<span class="cm"> */</span>
+<span class="kt">int</span> <span class="nf">nvm_cmd_rprt_arbc</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="kt">int</span> <span class="n">cs</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_addr</span> <span class="o">*</span><span class="n">addr</span><span class="p">);</span>
+
+<span class="cm">/**</span>
 <span class="cm"> * Execute an Open-Channel 1.2 get bad-block-table</span>
 <span class="cm"> *</span>
 <span class="cm"> * NOTE: Caller is responsible for de-allocating the returned structure</span>
@@ -473,6 +494,13 @@
 <span class="cm"> */</span>
 <span class="k">struct</span> <span class="n">nvm_spec_bbt</span> <span class="o">*</span><span class="nf">nvm_cmd_gbbt</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_addr</span> <span class="n">addr</span><span class="p">,</span>
 				  <span class="k">struct</span> <span class="n">nvm_ret</span> <span class="o">*</span><span class="n">ret</span><span class="p">);</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * Find an arbitrary blk in the given state on the given device</span>
+<span class="cm"> *</span>
+<span class="cm"> * @returns 0 on success, -1 on error and errno set to indicate the error.</span>
+<span class="cm"> */</span>
+<span class="kt">int</span> <span class="nf">nvm_cmd_gbbt_arbc</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="kt">int</span> <span class="n">bs</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_addr</span> <span class="o">*</span><span class="n">addr</span><span class="p">);</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * Execute an Open-Channel 1.2 get bad block table command</span>
@@ -1018,6 +1046,16 @@
 <span class="kt">void</span> <span class="nf">nvm_buf_pr</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">nbytes</span><span class="p">);</span>
 
 <span class="cm">/**</span>
+<span class="cm"> * Returns the number of bytes where expected is different from actual</span>
+<span class="cm"> */</span>
+<span class="kt">size_t</span> <span class="nf">nvm_buf_diff</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">expected</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">actual</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">nbytes</span><span class="p">);</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * Prints the number and value of bytes where expected is different from actual</span>
+<span class="cm"> */</span>
+<span class="kt">void</span> <span class="nf">nvm_buf_diff_pr</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">expected</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">actual</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">nbytes</span><span class="p">);</span>
+
+<span class="cm">/**</span>
 <span class="cm"> * Write content of buffer into file</span>
 <span class="cm"> *</span>
 <span class="cm"> * @param buf Pointer to the buffer</span>
@@ -1038,6 +1076,24 @@
 <span class="cm"> * @returns 0 on success, -1 on error and errno set to indicate the error.</span>
 <span class="cm"> */</span>
 <span class="kt">int</span> <span class="nf">nvm_buf_from_file</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">nbytes</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">path</span><span class="p">);</span>
+
+<span class="k">struct</span> <span class="n">nvm_buf_set</span> <span class="p">{</span>
+	<span class="kt">char</span> <span class="o">*</span><span class="n">write</span><span class="p">;</span>
+	<span class="kt">char</span> <span class="o">*</span><span class="n">write_meta</span><span class="p">;</span>
+
+	<span class="kt">char</span> <span class="o">*</span><span class="n">read</span><span class="p">;</span>
+	<span class="kt">char</span> <span class="o">*</span><span class="n">read_meta</span><span class="p">;</span>
+
+	<span class="kt">size_t</span> <span class="n">nbytes</span><span class="p">;</span>
+	<span class="kt">size_t</span> <span class="n">nbytes_meta</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="k">struct</span> <span class="n">nvm_buf_set</span> <span class="o">*</span><span class="nf">nvm_buf_set_alloc</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">nbytes</span><span class="p">,</span>
+				      <span class="kt">size_t</span> <span class="n">nbytes_meta</span><span class="p">);</span>
+
+<span class="kt">void</span> <span class="nf">nvm_buf_set_fill</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_buf_set</span> <span class="o">*</span><span class="n">bufs</span><span class="p">);</span>
+
+<span class="kt">void</span> <span class="nf">nvm_buf_set_free</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_buf_set</span> <span class="o">*</span><span class="n">bufs</span><span class="p">);</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * Erase nvm at given addresses</span>
@@ -1201,24 +1257,16 @@
 <span class="k">struct</span> <span class="n">nvm_addr</span> <span class="nf">nvm_addr_lba2gen</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">off</span><span class="p">);</span>
 
 <span class="cm">/**</span>
-<span class="cm"> * Prints a humanly readable representation of the given address</span>
-<span class="cm"> *</span>
-<span class="cm"> * @param addr The address to print</span>
+<span class="cm"> * Prints a hexidecimal representation of the given address value</span>
 <span class="cm"> */</span>
 <span class="kt">void</span> <span class="nf">nvm_addr_pr</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_addr</span> <span class="n">addr</span><span class="p">);</span>
 
-<span class="kt">void</span> <span class="nf">nvm_addr_prl</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_addr</span> <span class="n">addr</span><span class="p">);</span>
-
 <span class="cm">/**</span>
 <span class="cm"> * Prints a humanly readable representation of the given list of addresses</span>
+<span class="cm"> * according to the geometry of the given device (spec 1.2 or 2.0)</span>
 <span class="cm"> */</span>
-<span class="kt">void</span> <span class="nf">nvm_addr_prn</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_addr</span> <span class="o">*</span><span class="n">addr</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">naddrs</span><span class="p">);</span>
-
-<span class="cm">/**</span>
-<span class="cm"> * Prints a humanly readable representation of the given list of addresses using</span>
-<span class="cm"> * representation as per the given device geotry</span>
-<span class="cm"> */</span>
-<span class="kt">void</span> <span class="nf">nvm_addr_print</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_addr</span> <span class="o">*</span><span class="n">addr</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">naddrs</span><span class="p">,</span> <span class="k">const</span> <span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">nvm_addr_prn</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_addr</span> <span class="o">*</span><span class="n">addr</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">naddrs</span><span class="p">,</span>
+		  <span class="k">const</span> <span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * Allocate a virtual block, spanning a given set of physical blocks</span>

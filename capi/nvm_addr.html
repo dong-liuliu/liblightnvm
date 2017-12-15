@@ -515,15 +515,7 @@
 <dl class="function">
 <dt id="c.nvm_addr_pr">
 <span class="target" id="liblightnvm_8h_1a7be914f85027e87b98d1d80148874ff7"></span>void <code class="descname">nvm_addr_pr</code><span class="sig-paren">(</span>struct  <a class="reference internal" href="#c.nvm_addr" title="nvm_addr">nvm_addr</a><em>&nbsp;addr</em><span class="sig-paren">)</span><a class="headerlink" href="#c.nvm_addr_pr" title="Permalink to this definition">¶</a></dt>
-<dd><p>Prints a humanly readable representation of the given address. </p>
-<p><dl class="docutils">
-<dt><strong>Parameters</strong></dt>
-<dd><ul class="breatheparameterlist first last simple">
-<li><code class="docutils literal"><span class="pre">addr</span></code>: The address to print </li>
-</ul>
-</dd>
-</dl>
-</p>
+<dd><p>Prints a hexidecimal representation of the given address value. </p>
 </dd></dl>
 
 </div>
@@ -531,8 +523,8 @@
 <h2>nvm_addr_prn<a class="headerlink" href="#nvm-addr-prn" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="c.nvm_addr_prn">
-<span class="target" id="liblightnvm_8h_1a68d50a6ea5c4d5e6c65ba27e674bffca"></span>void <code class="descname">nvm_addr_prn</code><span class="sig-paren">(</span>struct  <a class="reference internal" href="#c.nvm_addr" title="nvm_addr">nvm_addr</a>  *<em>&nbsp;addr</em>, unsigned int<em>&nbsp;naddrs</em><span class="sig-paren">)</span><a class="headerlink" href="#c.nvm_addr_prn" title="Permalink to this definition">¶</a></dt>
-<dd><p>Prints a humanly readable representation of the given list of addresses. </p>
+<span class="target" id="liblightnvm_8h_1a8ce7cf33a79ceb184e320569593c39a5"></span>void <code class="descname">nvm_addr_prn</code><span class="sig-paren">(</span>struct  <a class="reference internal" href="#c.nvm_addr" title="nvm_addr">nvm_addr</a>  *<em>&nbsp;addr</em>, unsigned int<em>&nbsp;naddrs</em>, const struct  <a class="reference internal" href="nvm_dev.html#c.nvm_dev" title="nvm_dev">nvm_dev</a>  *<em>&nbsp;dev</em><span class="sig-paren">)</span><a class="headerlink" href="#c.nvm_addr_prn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prints a humanly readable representation of the given list of addresses according to the geometry of the given device (spec 1.2 or 2.0) </p>
 </dd></dl>
 
 </div>
