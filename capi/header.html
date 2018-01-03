@@ -477,16 +477,16 @@
 				   <span class="kt">int</span> <span class="n">opt</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_ret</span> <span class="o">*</span><span class="n">ret</span><span class="p">);</span>
 
 <span class="cm">/**</span>
-<span class="cm"> * Find an arbitrary chunk in the given state on the given device</span>
+<span class="cm"> * Find an arbitrary set of &#39;naddrs&#39; chunk-addresses on the given &#39;dev&#39;, in the</span>
+<span class="cm"> * given chunk state &#39;cs&#39; and store them in the provided &#39;addrs&#39; array</span>
 <span class="cm"> *</span>
 <span class="cm"> * @returns 0 on success, -1 on error and errno set to indicate the error.</span>
 <span class="cm"> */</span>
-<span class="kt">int</span> <span class="nf">nvm_cmd_rprt_arbc</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="kt">int</span> <span class="n">cs</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_addr</span> <span class="o">*</span><span class="n">addr</span><span class="p">);</span>
+<span class="kt">int</span> <span class="nf">nvm_cmd_rprt_arbs</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="kt">int</span> <span class="n">cs</span><span class="p">,</span> <span class="kt">int</span> <span class="n">naddrs</span><span class="p">,</span>
+		      <span class="k">struct</span> <span class="n">nvm_addr</span> <span class="n">addrs</span><span class="p">[]);</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * Execute an Open-Channel 1.2 get bad-block-table</span>
-<span class="cm"> *</span>
-<span class="cm"> * NOTE: Caller is responsible for de-allocating the returned structure</span>
 <span class="cm"> *</span>
 <span class="cm"> * @return On success, pointer to bad block table is returned. On error, NULL is</span>
 <span class="cm"> * returned and `errno` set to indicate the error and ret filled with</span>
@@ -496,11 +496,13 @@
 				  <span class="k">struct</span> <span class="n">nvm_ret</span> <span class="o">*</span><span class="n">ret</span><span class="p">);</span>
 
 <span class="cm">/**</span>
-<span class="cm"> * Find an arbitrary blk in the given state on the given device</span>
+<span class="cm"> * Find an arbitrary set of &#39;naddrs&#39; block-addresses on the given &#39;dev&#39;, in the</span>
+<span class="cm"> * given block state &#39;bs&#39; and store them in the provided &#39;addrs&#39; array</span>
 <span class="cm"> *</span>
 <span class="cm"> * @returns 0 on success, -1 on error and errno set to indicate the error.</span>
 <span class="cm"> */</span>
-<span class="kt">int</span> <span class="nf">nvm_cmd_gbbt_arbc</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="kt">int</span> <span class="n">bs</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_addr</span> <span class="o">*</span><span class="n">addr</span><span class="p">);</span>
+<span class="kt">int</span> <span class="nf">nvm_cmd_gbbt_arbs</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="kt">int</span> <span class="n">bs</span><span class="p">,</span> <span class="kt">int</span> <span class="n">naddrs</span><span class="p">,</span>
+		      <span class="k">struct</span> <span class="n">nvm_addr</span> <span class="n">addrs</span><span class="p">[]);</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * Execute an Open-Channel 1.2 get bad block table command</span>
@@ -987,9 +989,20 @@
 <span class="cm"> *</span>
 <span class="cm"> * @param dev Device handle obtained with `nvm_dev_open`</span>
 <span class="cm"> *</span>
-<span class="cm"> * @returns The spec. 2.0 defined minimum write size</span>
+<span class="cm"> * @returns The spec. 2.0 defined minimum write size, in sectors. An equivalent</span>
+<span class="cm"> * value for spec. 1.2</span>
 <span class="cm"> */</span>
-<span class="kt">uint32_t</span> <span class="nf">nvm_dev_get_ws_min</span><span class="p">(</span><span class="k">const</span> <span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span>
+<span class="kt">int</span> <span class="nf">nvm_dev_get_ws_min</span><span class="p">(</span><span class="k">const</span> <span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * Returns the optimal write size, in number of sectors, for the given device.</span>
+<span class="cm"> *</span>
+<span class="cm"> * @param dev Device handle obtained with `nvm_dev_open`</span>
+<span class="cm"> *</span>
+<span class="cm"> * @returns The spec. 2.0 defined optimal write size, in sectors, an equivalent</span>
+<span class="cm"> * value for spec. 1.2</span>
+<span class="cm"> */</span>
+<span class="kt">int</span> <span class="nf">nvm_dev_get_ws_opt</span><span class="p">(</span><span class="k">const</span> <span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * Allocate a buffer aligned to match the given geometry</span>

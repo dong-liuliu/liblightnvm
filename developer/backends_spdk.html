@@ -166,7 +166,7 @@ sudo apt-get update &amp;&amp; sudo apt-get upgrade &amp;&amp; sudo apt-get dist
 
 # Get SPDK
 sudo git clone https://github.com/spdk/spdk /opt/spdk
-sudo chown -R safl:safl /opt/spdk
+sudo chown -R $USER:$USER /opt/spdk
 cd /opt/spdk
 git submodule update --init
 
