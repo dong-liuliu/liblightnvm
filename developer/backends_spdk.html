@@ -187,15 +187,36 @@ All unit tests passed
 =====================
 </pre></div>
 </div>
+<div class="section" id="compiling-liblightnvm">
+<h2>Compiling Liblightnvm<a class="headerlink" href="#compiling-liblightnvm" title="Permalink to this headline">¶</a></h2>
 <p>With SPDK in place, compile liblightnvm with:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span>make spdk
 </pre></div>
 </div>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="unbinding-devices">
-<h2>Unbinding devices<a class="headerlink" href="#unbinding-devices" title="Permalink to this headline">¶</a></h2>
+<h3>Unbinding devices<a class="headerlink" href="#unbinding-devices" title="Permalink to this headline">¶</a></h3>
 <p>Run the following:</p>
-<blockquote>
-<div>sudo /opt/spdk/scripts/setup.sh</div></blockquote>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">spdk</span><span class="o">/</span><span class="n">scripts</span><span class="o">/</span><span class="n">setup</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="device-identifiers">
+<h3>Device Identifiers<a class="headerlink" href="#device-identifiers" title="Permalink to this headline">¶</a></h3>
+<p>Since devices are no longer available in <cite>/dev</cite>, then the PCI ids are used
+using SPDK notation, such as <cite>traddr:0000:01:00.0</cite>, e.g. using the CLI:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>sudo nvm_dev info traddr:0000:01:00.0
+</pre></div>
+</div>
+<p>And using the API it would be similar to:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>...
+struct nvm_dev *dev = nvm_dev_open(&quot;traddr:0000:01:00.0&quot;);
+...
+</pre></div>
+</div>
+</div>
 </div>
 </div>
 
