@@ -207,14 +207,8 @@ SSD. Include the liblightnvm header in your C/C++ source:</p>
 </div>
 <div class="section" id="compile-it">
 <h3>Compile it<a class="headerlink" href="#compile-it" title="Permalink to this headline">¶</a></h3>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>gcc hello.c -llightnvm -o hello
+<div class="highlight-bash"><div class="highlight"><pre><span></span>gcc hello.c -fopenmp -llightnvm -o hello
 </pre></div>
-</div>
-<div class="admonition tip">
-<p class="first admonition-title">Tip</p>
-<p class="last">liblightnvm is also available as a <strong>static</strong> library. So you can add
-<cite>/usr/lib/liblightnvm.a</cite> to your compiler target instead of linking
-dynamically.</p>
 </div>
 </div>
 <div class="section" id="run-it">
