@@ -1272,13 +1272,13 @@
 <span class="cm">/**</span>
 <span class="cm"> * Prints a hexidecimal representation of the given address value</span>
 <span class="cm"> */</span>
-<span class="kt">void</span> <span class="nf">nvm_addr_pr</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_addr</span> <span class="n">addr</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">nvm_addr_pr</span><span class="p">(</span><span class="k">const</span> <span class="k">struct</span> <span class="n">nvm_addr</span> <span class="n">addr</span><span class="p">);</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * Prints a humanly readable representation of the given list of addresses</span>
 <span class="cm"> * according to the geometry of the given device (spec 1.2 or 2.0)</span>
 <span class="cm"> */</span>
-<span class="kt">void</span> <span class="nf">nvm_addr_prn</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_addr</span> <span class="o">*</span><span class="n">addr</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">naddrs</span><span class="p">,</span>
+<span class="kt">void</span> <span class="nf">nvm_addr_prn</span><span class="p">(</span><span class="k">const</span> <span class="k">struct</span> <span class="n">nvm_addr</span> <span class="o">*</span><span class="n">addr</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">naddrs</span><span class="p">,</span>
 		  <span class="k">const</span> <span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span>
 
 <span class="cm">/**</span>
