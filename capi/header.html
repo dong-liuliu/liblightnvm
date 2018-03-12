@@ -1191,11 +1191,20 @@
 <span class="kt">int</span> <span class="nf">nvm_addr_check</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_addr</span> <span class="n">addr</span><span class="p">,</span> <span class="k">const</span> <span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">);</span>
 
 <span class="cm">/**</span>
-<span class="cm"> * Compute log page offset (lpo) for the get-log-page command for chunk information</span>
+<span class="cm"> * Compute log page offset (lpo) for the chunk-information log page</span>
+<span class="cm"> *</span>
+<span class="cm"> * That is, the chunk-descriptor address for the given address in the log page</span>
 <span class="cm"> *</span>
 <span class="cm"> * @returns the log page offset (lpo) for the given addr</span>
 <span class="cm"> */</span>
-<span class="kt">uint64_t</span> <span class="nf">nvm_addr_to_lpo</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_addr</span> <span class="n">addr</span><span class="p">);</span>
+<span class="kt">uint64_t</span> <span class="nf">nvm_addr_gen2lpo</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="k">struct</span> <span class="n">nvm_addr</span> <span class="n">addr</span><span class="p">);</span>
+
+<span class="cm">/**</span>
+<span class="cm"> * Inverse function of `nvm_addr_gen2lpo`</span>
+<span class="cm"> *</span>
+<span class="cm"> * @returns the page offset (lpo) for the given addr</span>
+<span class="cm"> */</span>
+<span class="k">struct</span> <span class="n">nvm_addr</span> <span class="nf">nvm_addr_lpo2gen</span><span class="p">(</span><span class="k">struct</span> <span class="n">nvm_dev</span> <span class="o">*</span><span class="n">dev</span><span class="p">,</span> <span class="kt">uint64_t</span> <span class="n">lpo</span><span class="p">);</span>
 
 <span class="cm">/**</span>
 <span class="cm"> * Converts a given physical address generic-format to device-format</span>
