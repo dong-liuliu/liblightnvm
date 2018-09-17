@@ -41,6 +41,7 @@ static struct nvm_be *nvm_backends[] = {
 	&nvm_be_sysfs,
 	&nvm_be_lba,
 	&nvm_be_spdk,
+	&nvm_be_spdk_advanced,
 	NULL
 };
 

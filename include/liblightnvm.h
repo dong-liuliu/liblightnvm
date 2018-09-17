@@ -59,8 +59,9 @@ enum nvm_be_id {
 	NVM_BE_SYSFS	= 0x1 << 1,	///< IOCTL + sysfs backend
 	NVM_BE_LBA	= 0x1 << 2,	///< IOCTL + sysfs + LBA backend
 	NVM_BE_SPDK	= 0x1 << 3,	///< SPDK backend
+	NVM_BE_SPDK_ADVANCED	= 0x1 << 4,	///< SPDK advanced backend
 };
-#define NVM_BE_ALL (NVM_BE_IOCTL | NVM_BE_SYSFS | NVM_BE_LBA | NVM_BE_SPDK)
+#define NVM_BE_ALL (NVM_BE_IOCTL | NVM_BE_SYSFS | NVM_BE_LBA | NVM_BE_SPDK | NVM_BE_SPDK_ADVANCED)
 
 /**
  * Plane-mode access for IO
