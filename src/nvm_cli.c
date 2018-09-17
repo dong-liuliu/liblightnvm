@@ -962,7 +962,7 @@ int _evar_be_id(struct nvm_cli *cli)
 		cli->evars.be_id = NVM_BE_ANY;
 		return 0;
 	}
-
+	printf("cli be id is %s\n", id);
 	switch(strtoll(id, NULL, 16)) {
 	case NVM_BE_ANY:
 		cli->evars.be_id = NVM_BE_ANY;
@@ -997,7 +997,7 @@ int _evar_and_dev_setup(struct nvm_cli *cli)
 	}
 
 	if (_evar_be_id(cli) < 0) {		// Backend identifier
-		perror("# NVM_CLI_BE_ID");
+		perror("# ~~~NVM_CLI_BE_ID");
 		return -1;
 	}
 

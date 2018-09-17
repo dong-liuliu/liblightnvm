@@ -190,6 +190,8 @@ int nvm_be_populate(struct nvm_dev *dev, struct nvm_be *be)
 	struct nvm_spec_idfy *idfy = NULL;
 
 	idfy = be->idfy(dev, NULL);
+
+	printf("nvm_be_populate identified %p\n", idfy);
 	if (!idfy) {
 		NVM_DEBUG("FAILED: nvm_cmd_idfy");
 		return -1; // NOTE: Propagate errno
@@ -201,6 +203,7 @@ int nvm_be_populate(struct nvm_dev *dev, struct nvm_be *be)
 	dev->idfy = *idfy;
 	dev->verid = geo->verid = idfy->s.verid;
 
+	printf("idfy->s.verid is %d\n", idfy->s.verid);
 	switch (idfy->s.verid) {
 	case NVM_SPEC_VERID_12:
 		// Geometry
@@ -259,6 +262,7 @@ int nvm_be_populate(struct nvm_dev *dev, struct nvm_be *be)
 		return -1;
 	}
 
+	printf("nvm_be_populate identified exit\n");
 	nvm_buf_free(idfy);
 
 	return 0;
