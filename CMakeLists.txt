@@ -125,7 +125,8 @@ set(SOURCE_FILES
 
 if(${NVM_BE_SPDK_ADVANCED_ENABLED})
 	set(SOURCE_FILES ${SOURCE_FILES}
-	${SPDK_ROOT_DIR}/lib/liblightnvm/nvm_be_spdk_advanced.c)
+	${SPDK_ROOT_DIR}/lib/liblightnvm/nvm_be_spdk_advanced.c
+	${SPDK_ROOT_DIR}/lib/liblightnvm/nvm_be_spdk_advanced_intel34.c)
 
 	add_definitions("-Wno-unused-parameter -std=gnu99")
 endif()

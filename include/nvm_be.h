@@ -170,5 +170,6 @@ extern struct nvm_be nvm_be_sysfs;
 extern struct nvm_be nvm_be_lba;
 extern struct nvm_be nvm_be_spdk;
 extern struct nvm_be nvm_be_spdk_advanced;
+extern struct nvm_be nvm_be_spdk_advanced_intel34;
 
 #endif /* __INTERNAL_NVM_BE_H */

@@ -981,6 +981,9 @@ int _evar_be_id(struct nvm_cli *cli)
 		return 0;
 	case NVM_BE_SPDK_ADVANCED:
 		cli->evars.be_id = NVM_BE_SPDK_ADVANCED;
+		return 0;
+	case NVM_BE_SPDK_ADVANCED_INTEL34:
+		cli->evars.be_id = NVM_BE_SPDK_ADVANCED_INTEL34;
 
 		return 0;
 	}
