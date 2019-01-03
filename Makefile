@@ -116,6 +116,16 @@ spdk_on:
 spdk_off:
 	$(eval CMAKE_OPTS := ${CMAKE_OPTS} -DNVM_BE_SPDK_ENABLED=OFF)
 
+spdk_root_dir ?= "/usr/src/spdk_ocssd/"
+.PHONY: spdk_advanced_on
+spdk_advanced_on:
+	$(eval CMAKE_OPTS := ${CMAKE_OPTS} -DNVM_BE_SPDK_ADVANCED_ENABLED=ON)
+	$(eval CMAKE_OPTS := ${CMAKE_OPTS} -DSPDK_ROOT_DIR=${spdk_root_dir})
+
+.PHONY: spdk_advanced_off
+spdk_advanced_off:
+	$(eval CMAKE_OPTS := ${CMAKE_OPTS} -DNVM_BE_SPDK_ADVANCED_ENABLED=OFF)
+
 .PHONY: debug_on
 debug_on:
 	$(eval BUILD_TYPE := Debug)

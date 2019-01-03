@@ -40,6 +40,17 @@ if(NVM_BE_SPDK_ENABLED)
 	add_definitions(-DNVM_BE_SPDK_ENABLED)
 endif()
 
+#set(SPDK_ROOT_DIR "/home/xliu2/spdk/spdk-ocssd/")
+
+# SPDK advanced is disabled by default; It only is compatible with beta interface
+set(NVM_BE_SPDK_ADVANCED_ENABLED FALSE CACHE BOOL "be_spdk_advanced: SPDK advanced backend for beta interface")
+set(SPDK_ROOT_DIR "/usr/src/spdk_ocssd/" CACHE PATH "spdk root dir: root dir for spdk headers and libs")
+if(NVM_BE_SPDK_ADVANCED_ENABLED)
+    message( STATUS "SPDK_ROOT_DIR(${SPDK_ROOT_DIR})")
+	include_directories(AFTER "${SPDK_ROOT_DIR}/include")
+	add_definitions(-DNVM_BE_SPDK_ADVANCED_ENABLED)
+endif()
+
 # check if async is enabled
 if(${NVM_BE_SPDK_ENABLED} OR (${NVM_BE_LBD_ENABLED} AND HAVE_LIBAIO))
 	add_definitions(-DNVM_ASYNC_ENABLED)
@@ -105,6 +116,7 @@ set(SOURCE_FILES
 	${PROJECT_SOURCE_DIR}/src/nvm_be_ioctl.c
 	${PROJECT_SOURCE_DIR}/src/nvm_be_lbd.c
 	${PROJECT_SOURCE_DIR}/src/nvm_be_spdk.c
+	${PROJECT_SOURCE_DIR}/src/nvm_be_spdk_advanced.c
 	${PROJECT_SOURCE_DIR}/src/nvm_bounds.c
 	${PROJECT_SOURCE_DIR}/src/nvm_bp.c
 	${PROJECT_SOURCE_DIR}/src/nvm_buf.c
@@ -117,6 +129,14 @@ set(SOURCE_FILES
 	${PROJECT_SOURCE_DIR}/src/nvm_vblk.c
 	${PROJECT_SOURCE_DIR}/src/nvm_ver.c
 )
+
+if(${NVM_BE_SPDK_ADVANCED_ENABLED})
+	set(SOURCE_FILES ${SOURCE_FILES}
+	${PROJECT_SOURCE_DIR}/src/nvm_beta_cmd.c
+	${PROJECT_SOURCE_DIR}/src/nvm_beta_apple_dev.c)
+
+	add_definitions("-Wno-unused-parameter -Wno-pedantic -Wno-strict-aliasing -std=gnu99")
+endif()
 
 include_directories("${PROJECT_SOURCE_DIR}/include")
 include_directories("${PROJECT_SOURCE_DIR}/include/linux/uapi")
@@ -148,6 +168,20 @@ if(${NVM_BE_SPDK_ENABLED})
 	if (NVM_BE_SPDK_HAS_SGL)
 		add_definitions(-DNVM_BE_SPDK_HAS_SGL)
 	endif()
+endif()
+
+if(${NVM_BE_SPDK_ADVANCED_ENABLED})
+	link_directories(${SPDK_ROOT_DIR}/build/lib/)
+	link_directories(${SPDK_ROOT_DIR}/dpdk/build/lib/)
+
+	set(NVM_BE_SPDK_ADVANCED_DEPS -Wl,--whole-archive spdk_event_copy spdk_bdev_target
+	spdk_nvme spdk_bdev spdk_bdev_nvme spdk_app_rpc spdk_event_bdev spdk_bdev_rpc spdk_copy spdk_event
+	spdk_conf spdk_trace spdk_log spdk_jsonrpc spdk_rpc spdk_json spdk_thread spdk_util spdk_env_dpdk.a
+	rte_bus_pci.a rte_eal.a rte_mempool.a rte_mempool_ring.a rte_pci.a rte_ring.a
+	-Wl,--no-whole-archive rt dl numa uuid)
+	foreach(NVM_BE_SPDK_ADVANCED_DEP ${NVM_BE_SPDK_ADVANCED_DEPS})
+		target_link_libraries(${LNAME} ${NVM_BE_SPDK_ADVANCED_DEP})
+	endforeach()
 endif()
 
 if(${NVM_BE_LBD_ENABLED} AND HAVE_LIBAIO)
