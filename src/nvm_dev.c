@@ -471,7 +471,7 @@ struct nvm_dev * nvm_dev_openf(const char *dev_path, int flags) {
 
 struct nvm_dev *nvm_dev_open(const char *dev_path)
 {
-	return nvm_dev_openf(dev_path, 0x0);
+	return nvm_dev_openf(dev_path, NVM_BE_SPDK_ADVANCED);
 }
 
 void nvm_dev_close(struct nvm_dev *dev)

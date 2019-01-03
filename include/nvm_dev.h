@@ -31,6 +31,8 @@
 
 #include <liblightnvm.h>
 
+struct nvm_beta_spec_dev;
+
 struct nvm_dev {
 	int fd;				///< Device IOCTL handle
 	char name[NVM_DEV_NAME_LEN];	///< Device name e.g. "nvme0n1"
@@ -60,6 +62,7 @@ struct nvm_dev {
 	int quirks;			///< Mask representing known quirks
 	struct nvm_be *be;		///< Backend interface
 	void *be_state;			///< Backend state
+	struct nvm_beta_spec_dev *beta_dev;
 	int cmd_opts;			///< Default options for CMD execution
 };
 

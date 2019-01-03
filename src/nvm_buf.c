@@ -32,7 +32,7 @@
 #include <nvm_dev.h>
 #include <nvm_be.h>
 
-#ifdef NVM_BE_SPDK_ENABLED
+#if  defined(NVM_BE_SPDK_ENABLED) || defined(NVM_BE_SPDK_ADVANCED_ENABLED)
 #include <spdk/stdinc.h>
 #include <spdk/env.h>
 #include <spdk/nvme.h>
@@ -96,6 +96,7 @@ void *nvm_buf_alloc(const struct nvm_dev *dev, size_t nbytes, uint64_t *phys)
 		return nvm_buf_virt_alloc(alignment, nbytes);
 
 	case NVM_BE_SPDK:
+	case NVM_BE_SPDK_ADVANCED:
 		return spdk_dma_malloc(nbytes, alignment, phys);
 
 	case NVM_BE_ANY:
@@ -116,6 +117,7 @@ void nvm_buf_free(const struct nvm_dev *dev, void *buf)
 			break;
 
 		case NVM_BE_SPDK:
+		case NVM_BE_SPDK_ADVANCED:
 			spdk_dma_free(buf);
 			break;
 
@@ -146,6 +148,7 @@ int nvm_buf_vtophys(const struct nvm_dev *dev, void *buf, uint64_t *phys)
 			return -1;
 
 		case NVM_BE_SPDK:
+		case NVM_BE_SPDK_ADVANCED:
 			*phys = spdk_vtophys(buf);
 			if (SPDK_VTOPHYS_ERROR == *phys) {
 				errno = EIO;

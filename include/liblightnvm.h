@@ -372,21 +372,21 @@ struct nvm_addr {
  * @see nvm_dev_get_geo
  */
 struct nvm_geo {
+
+	/**
+	 * Geometry as represented in OCSSD 2.0
+	 */
+	struct {
+		size_t npugrp;		///< # Parallel Unit Groups
+		size_t npunit;		///< # Parallel Units in PUG
+		size_t nchunk;		///< # Chunks in PU
+
+		size_t nsectr;		///< # Sectors per CNK
+		size_t nbytes;		///< # Bytes per SECTOR
+		size_t nbytes_oob;	///< # Bytes per SECTOR in OOB
+	} l;
+
 	union {
-
-		/**
-		 * Geometry as represented in OCSSD 2.0
-		 */
-		struct {
-			size_t npugrp;		///< # Parallel Unit Groups
-			size_t npunit;		///< # Parallel Units in PUG
-			size_t nchunk;		///< # Chunks in PU
-
-			size_t nsectr;		///< # Sectors per CNK
-			size_t nbytes;		///< # Bytes per SECTOR
-			size_t nbytes_oob;	///< # Bytes per SECTOR in OOB
-		} l;
-
 		/**
 		 * Geometry as represented in OCSSD 1.2
 		 */
