@@ -301,15 +301,18 @@ int nvm_async_wait(struct nvm_dev *dev, struct nvm_async_ctx *ctx);
  * @struct nvm_ret
  */
 struct nvm_ret {
-	union {
-		struct {
-			uint64_t cs;	///< NVM completion status (CS)
-		} vio;			///< Vector I/O result
+//	union {
+//		struct {
+//			uint64_t cs;	///< NVM completion status (CS)
+//		} vio;			///< Vector I/O result
+//
+//		uint32_t cdw0;		///< NVMe command specific result
+//	} result;
 
-		uint32_t cdw0;		///< NVMe command specific result
-	} result;
+//	uint16_t status;		///< NVMe command status
 
-	uint16_t status;		///< NVMe command status
+	uint64_t status;	///< NVMe command status / completion bits
+	uint32_t result;	///< NVMe command error codes
 
 	struct nvm_async_cmd_ctx async;	///< ASYNC command context
 };

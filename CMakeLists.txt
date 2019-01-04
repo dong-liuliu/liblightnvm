@@ -20,12 +20,12 @@ add_definitions(-DLNVM_VERSION=${NVM_VERSION})
 #
 # BACKENDS -- begin
 #
-set(NVM_BE_IOCTL_ENABLED ${UNIX} CACHE BOOL "be_ioctl: Linux IOCTL backend")
+set(NVM_BE_IOCTL_ENABLED FALSE CACHE BOOL "be_ioctl: Linux IOCTL backend")
 if (NVM_BE_IOCTL_ENABLED)
 	add_definitions(-DNVM_BE_IOCTL_ENABLED)
 endif()
 
-set(NVM_BE_LBD_ENABLED ${UNIX} CACHE BOOL "be_lbd: Linux IOCTL/LBD backend")
+set(NVM_BE_LBD_ENABLED FALSE CACHE BOOL "be_lbd: Linux IOCTL/LBD backend")
 if (NVM_BE_LBD_ENABLED)
 	add_definitions(-DNVM_BE_LBD_ENABLED)
 	find_library(HAVE_LIBAIO NAMES aio)

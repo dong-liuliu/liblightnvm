@@ -53,15 +53,15 @@ void nvm_cmd_wrap_term(struct nvm_cmd_wrap *wrap)
 void nvm_cmd_wrap_cpl(struct nvm_cmd_wrap *wrap,
 		      const struct nvm_nvme_cpl *cpl)
 {
-	if (wrap->ret) {
-		wrap->ret->result.cdw0 = cpl->cdw0;
-		wrap->ret->status = cpl->status.sc
-					| (cpl->status.sct << 8)
-					| (cpl->status.m   << 13)
-					| (cpl->status.dnr << 14);
-	}
-
-	wrap->completed = (cpl->status.sc != 0 || cpl->status.sct != 0) ? -1 : 1;
+//	if (wrap->ret) {
+//		wrap->ret->result.cdw0 = cpl->cdw0;
+//		wrap->ret->status = cpl->status.sc
+//					| (cpl->status.sct << 8)
+//					| (cpl->status.m   << 13)
+//					| (cpl->status.dnr << 14);
+//	}
+//
+//	wrap->completed = (cpl->status.sc != 0 || cpl->status.sct != 0) ? -1 : 1;
 }
 
 /**
