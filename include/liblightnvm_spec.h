@@ -248,7 +248,7 @@ struct nvm_spec_idfy_s20 {
 	uint8_t				rsvd4[2816];
 	uint8_t				vndr[1024];
 };
-static_assert(sizeof(struct nvm_spec_idfy_s20) == 4096, "Incorrect size");
+//static_assert(sizeof(struct nvm_spec_idfy_s20) == 4096, "Incorrect size");
 
 /**
  * Identify command data structure
@@ -265,7 +265,7 @@ struct nvm_spec_idfy {
 		} s;	///< Shared between the revisions
 	};
 };
-static_assert(sizeof(struct nvm_spec_idfy) == 4096, "Incorrect size");
+//static_assert(sizeof(struct nvm_spec_idfy) == 4096, "Incorrect size");
 
 void nvm_spec_idfy_pr(const struct nvm_spec_idfy *idfy, int quirks);
 
@@ -323,7 +323,7 @@ struct nvm_spec_rprt_descr {
 	uint64_t naddrs;	///< AKA Number of blocks in chunk (CNLB)
 	uint64_t wp;		///< Write Pointer (WP)
 };
-static_assert(sizeof(struct nvm_spec_rprt_descr) == 32, "Incorrect size");
+//static_assert(sizeof(struct nvm_spec_rprt_descr) == 32, "Incorrect size");
 
 void nvm_spec_rprt_descr_pr(const struct nvm_spec_rprt_descr *descr);
 
@@ -374,7 +374,7 @@ union nvm_nvme_feat {
 	*/
 	uint32_t a;
 };
-static_assert(sizeof(union nvm_nvme_feat) == 4, "Incorrect size");
+//static//static_assertf(union nvm_nvme_feat) == 4, "Incorrect size");
 
 #define NVM_NVME_FEAT_ERROR_RECOVERY_DULBE(feat) (feat & (1 << 16))
 #define NVM_NVME_FEAT_ERROR_RECOVERY_TLER(feat)  (feat & 0xffff)
@@ -387,7 +387,7 @@ struct nvm_nvme_lbaf {
 	uint8_t  ds;	///< lba data size
 	uint8_t  rp;	///< relative performance
 };
-static_assert(sizeof(struct nvm_nvme_lbaf) == 4, "Incorrect size");
+//static_assert(sizeof(struct nvm_nvme_lbaf) == 4, "Incorrect size");
 
 struct nvm_nvme_ns {
 	uint64_t nsze;			///< namespace size
@@ -426,7 +426,7 @@ struct nvm_nvme_ns {
 	uint8_t  rsvd192[192];		///< reserved
 	uint8_t  vs[3712];		///< vendor specific
 };
-static_assert(sizeof(struct nvm_nvme_ns) == 4096, "Incorrect size");
+//static_assert(sizeof(struct nvm_nvme_ns) == 4096, "Incorrect size");
 
 /**
  * Prints a humanly readable representation of the give address format mask
@@ -486,7 +486,7 @@ struct nvm_nvme_status {
 	uint16_t m	:  1;	///< more
 	uint16_t dnr	:  1;	///< do not retry
 };
-static_assert(sizeof(struct nvm_nvme_status) == 2, "Incorrect size");
+//static_assert(sizeof(struct nvm_nvme_status) == 2, "Incorrect size");
 
 /**
  * Completion queue entry
@@ -506,7 +506,7 @@ struct nvm_nvme_cpl {
 	uint16_t		cid;	///< command identifier
 	struct nvm_nvme_status	status;
 };
-static_assert(sizeof(struct nvm_nvme_cpl) == 16, "Incorrect size");
+//static_assert(sizeof(struct nvm_nvme_cpl) == 16, "Incorrect size");
 
 struct nvm_nvme_cmd {
 	/* cdw 00 */
@@ -611,6 +611,6 @@ struct nvm_nvme_cmd {
 	/* cdw 14-15 */
 	uint64_t addrs_dst;			///< destination addresses
 };
-static_assert(sizeof(struct nvm_nvme_cmd) == 64, "Incorrect size");
+//static_assert(sizeof(struct nvm_nvme_cmd) == 64, "Incorrect size");
 
 #endif /* __LIBLIGHTNVM_SPEC_H */
