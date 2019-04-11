@@ -585,6 +585,7 @@ struct nvm_spec_rprt *nvm_beta_apple_rprt(struct nvm_dev *dev, struct nvm_addr *
 	struct nvm_spec_rprt_descr *chunkinfo_buf = NULL;
 	size_t rprt_len, ndescr;
 	int rc;
+	size_t count;
 
 	if (NVM_SPEC_VERID_20 != dev->verid) {
 		errno = EINVAL;
@@ -605,20 +606,18 @@ struct nvm_spec_rprt *nvm_beta_apple_rprt(struct nvm_dev *dev, struct nvm_addr *
 	memset(chunkinfo_buf, 0, ndescr * DESCR_NBYTES);
 	rprt->ndescr = ndescr;
 
-	for (size_t i = 0; i < ndescr; i += 0x1000) {
-		const size_t count = NVM_MIN(0x1000, ndescr - i);
-		lpo_off += i * DESCR_NBYTES;
-
+	for (size_t i = 0; i < ndescr; i += 0x1000 / DESCR_NBYTES, lpo_off += count * DESCR_NBYTES) {
+		count = NVM_MIN(0x1000 / DESCR_NBYTES, ndescr - i);
 		spdk_ocssd_apple_chunkinfo_cmd(&cmd, lpo_off, count);
 
 		rc = spdk_bdev_req_admin_passthru_sync(bt, (struct spdk_nvme_cmd *)&cmd, &chunkinfo_buf[i],
-				count * DESCR_NBYTES, &internal_ret);
+				count, &internal_ret);
 		if (ret != NULL) {
 			*ret = *(struct nvm_ret *)&internal_ret;
 		}
 
 		if (rc|| spdk_bdev_aio_ret_check(&internal_ret)) {
-			NVM_DEBUG("FAILED: nvm_be_spdk_advanced_geometry");
+			NVM_DEBUG("FAILED: nvm_be_spdk_advanced_rprt_chunk");
 			goto failed;
 		}
 	}
