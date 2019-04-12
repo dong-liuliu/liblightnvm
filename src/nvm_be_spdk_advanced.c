@@ -122,6 +122,8 @@ void nvm_be_spdk_advanced_close(struct nvm_dev *dev)
 {
 	struct nvm_be_spdk_advanced_state *state = dev ? dev->be_state : NULL;
 
+	dev->beta_dev->beta_spec_dev_fini(dev);
+
 	if (!state) {
 		return;
 	}
@@ -231,6 +233,12 @@ struct nvm_dev *nvm_be_spdk_advanced_open(const char *dev_path, int NVM_UNUSED(f
 		goto failed;
 	}
 
+	rc = dev->beta_dev->beta_spec_dev_init(dev);
+	if (rc) {
+		NVM_DEBUG("FAILED: beta_spec_dev_init");
+		goto failed;
+	}
+
 	nvm_be_geo_format_glue(dev->verid, &dev->geo);
 
 	NVM_DEBUG("Let's go!");
@@ -251,6 +259,7 @@ struct nvm_be nvm_be_spdk_advanced = {
 	.close = nvm_be_spdk_advanced_close,
 
 	.idfy = nvm_be_spdk_advanced_geometry,
+
 	.rprt = nvm_be_nosys_rprt,
 	.gfeat = nvm_be_nosys_gfeat,
 	.sfeat = nvm_be_nosys_sfeat,

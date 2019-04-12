@@ -20,6 +20,21 @@ extern "C" {
 /* sync mode cmd api for beta spec */
 
 //TODO: clarify unclear parameter
+
+ssize_t nvm_addr_inject_read_failed(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs,
+		 struct nvm_ret *ret);
+
+ssize_t nvm_addr_inject_write_failed(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs,
+		 struct nvm_ret *ret);
+
+ssize_t nvm_addr_inject_erase_failed(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs,
+		 struct nvm_ret *ret);
+
+ssize_t nvm_clean_error_inject(struct nvm_dev *dev, struct nvm_ret *ret);
+
+ssize_t nvm_clean_read_error_inject(struct nvm_dev *dev);
+
+
 ssize_t nvm_addr_read(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs,
 		 void *data, void *meta, uint16_t flags, int unclear,
 		 struct nvm_ret *ret);
@@ -53,6 +68,12 @@ ssize_t nvm_read_pm(struct nvm_dev* dev, void* buf, uint16_t flags,
 
 ssize_t nvm_write_pm(struct nvm_dev* dev, void* buf, uint16_t flags,
                      unsigned int length, unsigned int offset, struct nvm_ret* ret);
+
+ssize_t nvm_addr_read_reserved(struct nvm_dev* dev, struct nvm_addr *addr, int nsectors,
+		void* data_buf, uint16_t flags, struct nvm_ret* ret);
+
+ssize_t nvm_addr_write_reserved(struct nvm_dev* dev, struct nvm_addr *addr, int nsectors,
+		void* data_buf, uint16_t flags, struct nvm_ret* ret);
 
 //TODO: clarify definition of mef log
 struct nvm_log_page;
@@ -151,7 +172,25 @@ struct nvm_beta_spec_dev {
 	/* device recognition, return 1 if recognized */
 	int (* beta_dev_recognition)(struct nvm_dev *dev);
 
+	/* Prepare and release resource of the dev for beta API */
+	int (* beta_spec_dev_init)(struct nvm_dev *dev);
+	int (* beta_spec_dev_fini)(struct nvm_dev *dev);
+
 	/* synchronous operation */
+	ssize_t (* addr_inject_read_failed)(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs,
+			 struct nvm_ret *ret);
+
+	ssize_t (* addr_inject_write_failed)(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs,
+			 struct nvm_ret *ret);
+
+	ssize_t (* addr_inject_erase_failed)(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs,
+			 struct nvm_ret *ret);
+
+	ssize_t (* clean_error_inject)(struct nvm_dev *dev, struct nvm_ret *ret);
+
+	ssize_t (* clean_read_error_inject)(struct nvm_dev *dev);
+
+
 	ssize_t (* addr_read)(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs,
 			 void *data, void *meta, uint16_t flags, int unclear,
 			 struct nvm_ret *ret);
@@ -186,6 +225,13 @@ struct nvm_beta_spec_dev {
 
 	ssize_t (* write_pm)(struct nvm_dev* dev, void* buf, uint16_t flags,
                      unsigned int length, unsigned int offset, struct nvm_ret* ret);
+
+	ssize_t (*read_reserved)(struct nvm_dev* dev, struct nvm_addr *addr, int nsectors,
+			void* data_buf, uint16_t flags, struct nvm_ret* ret);
+
+	ssize_t (*write_reserved)(struct nvm_dev* dev, struct nvm_addr *addr, int nsectors,
+			void* data_buf, uint16_t flags, struct nvm_ret* ret);
+
 
 	ssize_t (* get_mef_log)(struct nvm_dev* dev, struct nvm_log_page *log);
 
@@ -242,8 +288,6 @@ struct nvm_beta_spec_dev {
 
 /* recognize what beta dev it is */
 struct nvm_beta_spec_dev *nvm_beta_dev_recognition(struct nvm_dev *dev);
-
-extern struct nvm_beta_spec_dev beta_apple_dev;
 
 #ifdef __cplusplus
 }

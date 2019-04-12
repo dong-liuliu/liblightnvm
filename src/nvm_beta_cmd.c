@@ -13,8 +13,11 @@
 #include <nvm_dev.h>
 #include <nvm_beta_cmd.h>
 
+extern struct nvm_beta_spec_dev beta_apple_dev;
+extern struct nvm_beta_spec_dev beta_banana_dev;
 
 static struct nvm_beta_spec_dev *beta_spec_devs[] = {
+		&beta_banana_dev,
 		&beta_apple_dev,
 		NULL,
 };
@@ -32,6 +35,82 @@ struct nvm_beta_spec_dev *nvm_beta_dev_recognition(struct nvm_dev *dev)
 
 	return NULL;
 }
+
+ssize_t nvm_addr_inject_read_failed(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs,
+		 struct nvm_ret *ret)
+{
+	if (dev->beta_dev == NULL) {
+		return -1;
+	}
+
+	if (!dev->beta_dev->addr_inject_read_failed) {
+		fprintf(stderr, "addr_inject_read_failed not implemented\n");
+		return -1;
+	}
+
+	return dev->beta_dev->addr_inject_read_failed(dev, addrs, naddrs, ret);
+}
+
+ssize_t nvm_addr_inject_write_failed(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs,
+		 struct nvm_ret *ret)
+{
+	if (dev->beta_dev == NULL) {
+		return -1;
+	}
+
+	if (!dev->beta_dev->addr_inject_write_failed) {
+		fprintf(stderr, "addr_inject_write_failed not implemented\n");
+		return -1;
+	}
+
+	return dev->beta_dev->addr_inject_write_failed(dev, addrs, naddrs, ret);
+}
+
+ssize_t nvm_addr_inject_erase_failed(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs,
+		 struct nvm_ret *ret)
+{
+	if (dev->beta_dev == NULL) {
+		return -1;
+	}
+
+	if (!dev->beta_dev->addr_inject_erase_failed) {
+		fprintf(stderr, "addr_inject_erase_failed not implemented\n");
+		return -1;
+	}
+
+	return dev->beta_dev->addr_inject_erase_failed(dev, addrs, naddrs, ret);
+}
+
+ssize_t nvm_clean_error_inject(struct nvm_dev *dev, struct nvm_ret *ret)
+{
+	if (dev->beta_dev == NULL) {
+		return -1;
+	}
+
+	if (!dev->beta_dev->clean_error_inject) {
+		fprintf(stderr, "clean_error_inject not implemented\n");
+		return -1;
+	}
+
+	return dev->beta_dev->clean_error_inject(dev, ret);
+}
+
+ssize_t nvm_clean_read_error_inject(struct nvm_dev *dev)
+
+{
+	if (dev->beta_dev == NULL) {
+		return -1;
+	}
+
+	if (!dev->beta_dev->clean_read_error_inject) {
+		fprintf(stderr, "clean_read_error_inject not implemented\n");
+		return -1;
+	}
+
+	return dev->beta_dev->clean_read_error_inject(dev);
+}
+
+
 
 ssize_t nvm_addr_read(struct nvm_dev *dev, struct nvm_addr addrs[], int naddrs,
 		 void *data, void *meta, uint16_t flags, int unclear,
@@ -223,6 +302,37 @@ ssize_t nvm_write_pm(struct nvm_dev* dev, void* buf, uint16_t flags,
 	}
 
 	return dev->beta_dev->write_pm(dev, buf, flags, length, offset, ret);
+}
+
+
+ssize_t nvm_addr_read_reserved(struct nvm_dev* dev, struct nvm_addr *addr, int nsectors,
+		void* data_buf, uint16_t flags, struct nvm_ret* ret)
+{
+	if (dev->beta_dev == NULL) {
+		return -1;
+	}
+
+	if (!dev->beta_dev->read_reserved) {
+		fprintf(stderr, "read_reserved not implemented\n");
+		return -1;
+	}
+
+	return dev->beta_dev->read_reserved(dev, addr, nsectors, data_buf, flags, ret);
+}
+
+ssize_t nvm_addr_write_reserved(struct nvm_dev* dev, struct nvm_addr *addr, int nsectors,
+		void* data_buf, uint16_t flags, struct nvm_ret* ret)
+{
+	if (dev->beta_dev == NULL) {
+		return -1;
+	}
+
+	if (!dev->beta_dev->write_reserved) {
+		fprintf(stderr, "write_reserved not implemented\n");
+		return -1;
+	}
+
+	return dev->beta_dev->write_reserved(dev, addr, nsectors, data_buf, flags, ret);
 }
 
 ssize_t nvm_get_mef_log(struct nvm_dev* dev, struct nvm_log_page *log)

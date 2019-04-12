@@ -133,6 +133,7 @@ set(SOURCE_FILES
 if(${NVM_BE_SPDK_ADVANCED_ENABLED})
 	set(SOURCE_FILES ${SOURCE_FILES}
 	${PROJECT_SOURCE_DIR}/src/nvm_beta_cmd.c
+	${PROJECT_SOURCE_DIR}/src/nvm_beta_banana_dev.c
 	${PROJECT_SOURCE_DIR}/src/nvm_beta_apple_dev.c)
 
 	add_definitions("-Wno-unused-parameter -Wno-pedantic -Wno-strict-aliasing -std=gnu99")

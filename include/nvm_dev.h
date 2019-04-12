@@ -62,7 +62,8 @@ struct nvm_dev {
 	int quirks;			///< Mask representing known quirks
 	struct nvm_be *be;		///< Backend interface
 	void *be_state;			///< Backend state
-	struct nvm_beta_spec_dev *beta_dev;
+	struct nvm_beta_spec_dev *beta_dev;	///< function table for a specific device to beta API
+	void *beta_dev_ctx;		///< the context required by nvm_beta_spec_dev to glue beta API with device abilities
 	int cmd_opts;			///< Default options for CMD execution
 };
 

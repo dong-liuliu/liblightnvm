@@ -61,51 +61,18 @@ static inline void nvm_be_geo_format_glue(int verid, struct nvm_geo *geo)
 	if (verid == NVM_SPEC_VERID_20) {
 		geo->nchannels = geo->l.npugrp;
 		geo->nluns = geo->l.npunit;
-		geo->nplanes = 1;
 		geo->nblocks = geo->l.nchunk;
-		geo->npages = geo->l.nsectr;
-		geo->nsectors = 1;
+		geo->nplanes = 1;
+		geo->nsectors = 32;
+		geo->npages = geo->l.nsectr / geo->nsectors;
 		geo->sector_nbytes = geo->l.nbytes;
-		geo->page_nbytes = geo->sector_nbytes;
-		geo->meta_nbytes = geo->l.nbytes_oob;
+		geo->page_nbytes = geo->l.nbytes * geo->nsectors;
+		geo->meta_nbytes = geo->l.nbytes_oob * geo->nsectors;
 	}
 #endif
 }
 
-static inline struct nvm_addr nvm_be_addr_format_glue(struct nvm_dev *dev, struct nvm_addr *addr)
-{
-
-#ifdef NVM_APP_ADDR_12
-	if (dev->verid == NVM_SPEC_VERID_20) {
-		struct nvm_geo *geo = &dev->geo;
-		struct nvm_addr addr_tmp = {0};
-
-		addr_tmp.l.pugrp = addr->g.ch;
-		addr_tmp.l.punit = addr->g.lun;
-		addr_tmp.l.chunk = geo->nblocks * addr->g.pl + addr->g.blk;
-		addr_tmp.l.sectr = geo->nsectors * addr->g.pg + addr->g.sec;
-
-		NVM_DEBUG("format1.2: ch=%d lun=%d blk=%d page=%d plane=%d sector=%d\n",
-				addr->g.ch, addr->g.lun, addr->g.blk, addr->g.pg, addr->g.pl, addr->g.sec);
-		NVM_DEBUG("format2: grp=%d punit=%d chunk=%d sector=%d\n",
-				addr_tmp.l.pugrp, addr_tmp.l.punit, addr_tmp.l.chunk, addr_tmp.l.sectr);
-
-		return addr_tmp;
-	}
-#endif
-
-	return *addr;
-}
-
-static inline uint64_t nvm_be_addr_gen2dev_glue(struct nvm_dev *dev, struct nvm_addr *addr)
-{
-	uint64_t d_addr = 0;
-	struct nvm_addr addr_tmp;
-
-	addr_tmp = nvm_be_addr_format_glue(dev, addr);
-	d_addr = nvm_addr_gen2dev(dev, addr_tmp);
-
-	return d_addr;
-}
+struct nvm_addr nvm_be_addr_format_glue(struct nvm_dev *dev, struct nvm_addr *addr_12);
+uint64_t nvm_be_addr_gen2dev_glue(struct nvm_dev *dev, struct nvm_addr *addr_12);
 
 #endif /* __INTERNAL_NVM_BE_SPDK */
