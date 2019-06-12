@@ -34,7 +34,7 @@
 
 void nvm_addr_pr(const struct nvm_addr addr)
 {
-	printf("0x%016"PRIx64, addr.val);
+	printf("0x%016"PRIx64"\n", addr.val);
 }
 
 static void nvm_addr_pr_s12(struct nvm_addr addr)
