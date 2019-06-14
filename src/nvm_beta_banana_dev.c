@@ -29,7 +29,8 @@
 enum ctx_op {
 	OP_WRITE = 0X91,
 	OP_READ = 0X92,
-	OP_PARITY = 0XA4,
+	OP_PARITY_INIT = 0XA0,
+	OP_PARITY_OUT = 0XA4,
 };
 
 #define BANANA_DEV_FAKE_LBA	0x1234ul
@@ -280,7 +281,7 @@ ssize_t nvm_addr_beta_banana_erase_one_sb(struct nvm_dev *dev, struct nvm_addr *
 
 	if (addr_12->g.ch != 0 || addr_12->g.lun != 0 || addr_12->g.pg != 0) {
 		NVM_DEBUG("FAILED: illegal address for super block");
-		errno = -EIO;
+		errno = EIO;
 		return -1;
 	}
 
@@ -352,13 +353,17 @@ static ssize_t nvm_addr_beta_banana_parity_init(struct nvm_dev *dev, struct nvm_
 	struct spdk_nvme_cmd cmd = {0};
 	int rc, i, j;
 	uint64_t *chk_ppa_lists;
-	uint64_t parity_ppa;
+	uint64_t parity_ppa = 0;
 	struct nvm_addr p_addr_20[1];
 	struct nvm_vblk *vblk;
 
 	p_addr_20[0] = nvm_be_addr_format_glue(dev, p_addr_12);
 
 	vblk = nvm_vblk_alloc_filtered_line(dev, p_addr_20->l.chunk);
+	if (vblk->nblks < 2) {
+		errno = EIO;
+		goto failed;
+	}
 
 	chk_ppa_lists = nvm_buf_alloc(dev, sizeof(uint64_t) * vblk->nblks, NULL);
 	for (i = 0, j = 0; i < vblk->nblks; j++, i++) {
@@ -388,11 +393,16 @@ static ssize_t nvm_addr_beta_banana_parity_init(struct nvm_dev *dev, struct nvm_
 
 	if (rc || spdk_bdev_aio_ret_check(&internal_ret)) {
 		NVM_DEBUG("FAILED: nvm_addr_beta_banana_parity_init");
-		return -1;
+		errno = -rc;
+		goto failed;
 	}
 
 	beta_banana_dev_vblk_set(dev, p_addr_20->l.chunk, vblk);
 	return 0;
+
+failed:
+	nvm_vblk_free(vblk);
+	return -1;
 }
 
 ssize_t nvm_addr_beta_banana_parities_init(struct nvm_dev *dev, struct nvm_addr addrs_12[], int naddrs, struct nvm_ret *ret)
@@ -434,7 +444,7 @@ static int beta_banana_vblk_fill_out(struct nvm_dev *dev, struct nvm_addr *blks,
 	int nsectors;
 	uint8_t *data;
 	struct nvm_addr tmp_addr_20;
-	int parity_idx;
+	int parity_idx = 0;
 
 	data = nvm_buf_alloc(dev, 4096, NULL);
 	if (data == NULL) {
@@ -622,31 +632,48 @@ struct cmd_ctx_naddr_arg {
 	struct cmd_ctx* ctx;
 	int cpl_count;
 };
-ssize_t nvm_beta_banana_get_async_cmd_event(struct nvm_dev* dev, struct result_ctx* rctx)
+
+static ssize_t _nvm_beta_banana_get_async_cmd_event(struct nvm_dev* dev, struct result_ctx* rctx, int is_nonblock)
 {
 	struct nvm_be_spdk_advanced_state *state = dev->be_state;
 	struct spdk_bdev_ret internal_ret = {0};
 	struct spdk_bdev_aio_ctx *async_ctx = state->async_ctx;
 	struct cmd_ctx_naddr_arg *naddr_arg = NULL;
-	int nr_min = rctx->max_count;
-	int nr = RESULT_MAX_CMD_CTX; // from the struct definition of result ctx;
+	int nr_min = 0;
+	int nr_max, nr;
 	struct spdk_bdev_aio_req *reqs[RESULT_MAX_CMD_CTX];
-	int rc, i, j;
+	int completed_nr, j;
 
 	assert(async_ctx);
+	assert(rctx->max_count <= RESULT_MAX_CMD_CTX);
 
+	nr_max = rctx->max_count;
+	if (rctx->max_count == 0) {
+		nr_max = 1;
+	}
+	/* rctx->max_count indicates how many ctx are expected by caller before calling get_async_cmd_event.
+	 * It also indicates how many ctx are completed after calling get_async_cmd_event.
+	 * It shoule be 0 if no ctx is completed.
+	 */
 	rctx->max_count = 0;
-	for (i = 0; i < nr_min - rctx->max_count; i++) {
-		rc = spdk_bdev_aio_ctx_get_reqs(async_ctx,
-				nr_min, nr, reqs, NULL);
-		if (rc < 0) {
-			errno = rc;
+	nr = nr_max - rctx->max_count;
+
+	/* This function can be block mode or nonblock mode */
+	if (is_nonblock == 0) {
+		nr_min = 1;
+	}
+
+	while (nr > 0) {
+		completed_nr = spdk_bdev_aio_ctx_get_reqs(async_ctx,
+				nr_min, nr_max, reqs, NULL);
+		if (completed_nr < 0) {
+			errno = completed_nr;
 			return -1;
-		} else if (rc == 0){
+		} else if (completed_nr == 0){
 			break;
 		}
 
-		for (j = 0; j < rc; j++) {
+		for (j = 0; j < completed_nr; j++) {
 			naddr_arg = spdk_bdev_aio_req_get_private_arg(reqs[j]);
 
 			/* Set result and status */
@@ -668,159 +695,234 @@ ssize_t nvm_beta_banana_get_async_cmd_event(struct nvm_dev* dev, struct result_c
 
 			free(reqs[j]);
 		}
+
+		/* Only continue query completed req if completed_nr == nr_max */
+		if (completed_nr < nr_max) {
+			break;
+		}
+
+		nr = nr_max - rctx->max_count;
 	}
 
 	return 0;
+}
+
+
+ssize_t nvm_beta_banana_get_async_cmd_event(struct nvm_dev* dev, struct result_ctx* rctx)
+{
+	int is_nonblock = 0;
+
+	return _nvm_beta_banana_get_async_cmd_event(dev, rctx, is_nonblock);
+}
+
+//TODO: some flags examples?
+static ssize_t nvm_addr_beta_banana_async_rw(struct nvm_dev* dev, struct cmd_ctx* ctx, uint16_t flags,
+                            int no_meta, int cmd_ctx_op_code)
+{
+	struct nvm_be_spdk_advanced_state *state = dev->be_state;
+	struct spdk_bdev_aio_ctx *async_ctx = state->async_ctx;
+	struct spdk_nvme_cmd cmd = {0};
+	int naddrs = ctx->naddrs;
+	struct nvm_addr *addrs = ctx->addrs;
+	int rc, i;
+	size_t sector_nbytes = dev->geo.l.nbytes;
+	size_t meta_nbytes = dev->geo.l.nbytes_oob;
+	void *data = ctx->data, *meta = ctx->meta;
+	void *data_loop, *meta_loop = NULL;
+	struct spdk_bdev_aio_req **reqs = NULL;
+	struct cmd_ctx_naddr_arg *naddr_arg = NULL;
+	uint64_t d_addr;
+
+	assert(async_ctx);
+
+	naddr_arg = malloc(sizeof(*naddr_arg));
+	if (naddr_arg == NULL) {
+		errno = ENOMEM;
+		return -1;
+	}
+	naddr_arg->cpl_count = naddrs;
+	naddr_arg->ctx = ctx;
+
+	reqs = calloc(naddrs, sizeof(*reqs));
+	if (reqs == NULL) {
+		errno = ENOMEM;
+		goto failed;
+	}
+	for (i = 0; i < naddrs; i++) {
+		reqs[i] = malloc(spdk_bdev_aio_req_size());
+		if (reqs[i] == NULL) {
+			errno = ENOMEM;
+			goto failed;
+		}
+	}
+
+	for (i = 0; i < naddrs; i++) {
+		data_loop = data + sector_nbytes * i;
+		if (meta_nbytes != 0 && meta != NULL) {
+			meta_loop = meta + meta_nbytes * i;
+		}
+
+		d_addr = nvm_be_addr_gen2dev_glue(dev,  &addrs[i]);
+		if (cmd_ctx_op_code == OP_READ) {
+			spdk_ocssd_banana_read_cmd(&cmd, d_addr, BANANA_DEV_FAKE_LBA);
+		} else if (cmd_ctx_op_code == OP_WRITE) {
+			spdk_ocssd_banana_write_cmd(&cmd, d_addr, BANANA_DEV_FAKE_LBA);
+		} else {
+			goto failed;
+		}
+
+		spdk_bdev_aio_req_set_io_passthru(reqs[i], &cmd, data_loop, sector_nbytes,
+				meta_loop, meta_nbytes);
+		spdk_bdev_aio_req_set_private_arg(reqs[i], naddr_arg);
+	}
+
+	ctx->opcode = cmd_ctx_op_code;
+
+	rc = spdk_bdev_aio_ctx_submit(async_ctx, naddrs, reqs);
+	if (rc) {
+		goto failed;
+	}
+
+	free(reqs);
+	return 0;
+
+failed:
+	if (reqs != NULL) {
+		for (i = 0; i < naddrs; i++) {
+			if (reqs[i] != NULL) {
+				free(reqs[i]);
+			}
+		}
+	}
+
+	free(naddr_arg);
+	free(reqs);
+
+	return -1;
 }
 
 //TODO: some flags examples?
 ssize_t nvm_addr_beta_banana_async_read(struct nvm_dev* dev, struct cmd_ctx* ctx, uint16_t flags,
                             int no_meta)
 {
-	struct nvm_be_spdk_advanced_state *state = dev->be_state;
-	struct spdk_bdev_aio_ctx *async_ctx = state->async_ctx;
-	struct spdk_nvme_cmd cmd = {0};
-	int naddrs = ctx->naddrs;
-	struct nvm_addr *addrs = ctx->addrs;
-	int rc, i;
-	size_t sector_nbytes = dev->geo.l.nbytes;
-	size_t meta_nbytes = dev->geo.l.nbytes_oob;
-	void *data = ctx->data, *meta = ctx->meta;
-	void *data_loop, *meta_loop = NULL;
-	struct spdk_bdev_aio_req **reqs = NULL;
-	struct cmd_ctx_naddr_arg *naddr_arg = NULL;
-	uint64_t d_addr;
-
-	assert(async_ctx);
-
-	naddr_arg = malloc(sizeof(*naddr_arg));
-	if (naddr_arg == NULL) {
-		errno = -ENOMEM;
-		return -1;
-	}
-	naddr_arg->cpl_count = naddrs;
-	naddr_arg->ctx = ctx;
-
-	reqs = calloc(naddrs, sizeof(*reqs));
-	if (reqs == NULL) {
-		errno = -ENOMEM;
-		goto failed;
-	}
-	for (i = 0; i < naddrs; i++) {
-		reqs[i] = malloc(spdk_bdev_aio_req_size());
-		if (reqs[i] == NULL) {
-			errno = -ENOMEM;
-			goto failed;
-		}
-	}
-
-	for (i = 0; i < naddrs; i++) {
-		data_loop = data + sector_nbytes * i;
-		if (meta_nbytes != 0 && meta != NULL) {
-			meta_loop = meta + meta_nbytes * i;
-		}
-
-		d_addr = nvm_be_addr_gen2dev_glue(dev,  &addrs[i]);
-		spdk_ocssd_banana_read_cmd(&cmd, d_addr, BANANA_DEV_FAKE_LBA);
-
-		spdk_bdev_aio_req_set_io_passthru(reqs[i], &cmd, data_loop, sector_nbytes,
-				meta_loop, meta_nbytes);
-		spdk_bdev_aio_req_set_private_arg(reqs[i], naddr_arg);
-	}
-
-	ctx->opcode = OP_READ;
-
-	rc = spdk_bdev_aio_ctx_submit(async_ctx, naddrs, reqs);
-	if (rc) {
-		goto failed;
-	}
-
-	free(reqs);
-	return 0;
-
-failed:
-	if (reqs != NULL) {
-		for (i = 0; i < naddrs; i++) {
-			if (reqs[i] != NULL) {
-				free(reqs[i]);
-			}
-		}
-	}
-
-	free(naddr_arg);
-	free(reqs);
-
-	return -1;
+	return nvm_addr_beta_banana_async_rw(dev, ctx, flags, no_meta, OP_READ);
 }
 
 
 ssize_t nvm_addr_beta_banana_async_protected_write(struct nvm_dev* dev, struct cmd_ctx* ctx, uint16_t flags,
                                    int head_idx, int fake_write, int no_meta)
 {
+	return nvm_addr_beta_banana_async_rw(dev, ctx, flags, no_meta, OP_WRITE);
+}
+
+
+static ssize_t nvm_addr_beta_banana_async_erase_one_sb(struct nvm_dev* dev, struct cmd_ctx* ctx, uint16_t flags)
+{
 	struct nvm_be_spdk_advanced_state *state = dev->be_state;
 	struct spdk_bdev_aio_ctx *async_ctx = state->async_ctx;
 	struct spdk_nvme_cmd cmd = {0};
-	int naddrs = ctx->naddrs;
-	struct nvm_addr *addrs = ctx->addrs;
-	int rc, i;
-	size_t sector_nbytes = dev->geo.l.nbytes;
-	size_t meta_nbytes = dev->geo.l.nbytes_oob;
-	void *data = ctx->data, *meta = ctx->meta;
-	void *data_loop, *meta_loop = NULL;
-	struct spdk_bdev_aio_req **reqs = NULL;
-	struct cmd_ctx_naddr_arg *naddr_arg = NULL;
+	size_t npugrp = dev->geo.l.npugrp;
+	size_t npunit = dev->geo.l.npunit;
+	struct nvm_addr addr_20_tmp[1] = {0};
+	struct nvm_addr addr_20;
+	struct nvm_addr *addr_12;
+	uint16_t npugrp_i, npunit_i;
 	uint64_t d_addr;
+	int rc, req_idx;
+	uint32_t i;
+	struct spdk_bdev_aio_req *reqs[128] = {0};
+	struct cmd_ctx_naddr_arg *naddr_arg = NULL;
 
-	assert(async_ctx);
+	if (ctx->naddrs != 1) {
+		NVM_DEBUG("FAILED: Unsupport erasing multiple super block");
+		errno = EINVAL;
+		return -1;
+	}
+
+	addr_12 = &ctx->addrs[0];
+
+	if (addr_12->g.ch != 0 || addr_12->g.lun != 0 || addr_12->g.pg != 0) {
+		NVM_DEBUG("FAILED: illegal address for super block");
+		errno = EINVAL;
+		return -1;
+	}
+
+	addr_20 = nvm_be_addr_format_glue(dev, addr_12);
+	addr_20_tmp->l.chunk = addr_20.l.chunk;
 
 	naddr_arg = malloc(sizeof(*naddr_arg));
 	if (naddr_arg == NULL) {
-		errno = -ENOMEM;
+		errno = ENOMEM;
 		return -1;
 	}
-	naddr_arg->cpl_count = naddrs;
 	naddr_arg->ctx = ctx;
 
-	reqs = calloc(naddrs, sizeof(*reqs));
-	if (reqs == NULL) {
-		errno = -ENOMEM;
-		goto failed;
-	}
-	for (i = 0; i < naddrs; i++) {
+	for (i = 0; i < npunit * npugrp; i++) {
 		reqs[i] = malloc(spdk_bdev_aio_req_size());
 		if (reqs[i] == NULL) {
-			errno = -ENOMEM;
+			errno = ENOMEM;
 			goto failed;
 		}
 	}
 
-	for (i = 0; i < naddrs; i++) {
-		data_loop = data + sector_nbytes * i;
-		if (meta_nbytes != 0 && meta != NULL) {
-			meta_loop = meta + meta_nbytes * i;
+	req_idx = 0;
+	for (npunit_i = 0; npunit_i < npunit; npunit_i++) {
+		addr_20_tmp->l.punit = npunit_i;
+
+		for (npugrp_i = 0; npugrp_i < npugrp; npugrp_i++) {
+			uint8_t chunk_state;
+
+			addr_20_tmp->l.pugrp = npugrp_i;
+			/* Check whether this blk is offline */
+			rc = beta_banana_dev_chunk_is_offline(dev, addr_20_tmp);
+			if (rc) {
+				continue;
+			}
+
+			/* Check whether this blk is in vacant or closed state */
+			chunk_state = beta_banana_dev_get_chunk_state(dev, addr_20_tmp);
+			NVM_DEBUG_DETAIL("Chunk(ch %d, lun %d, chunk %d) state is %d", npugrp_i, npunit_i, addr_20.l.chunk, chunk_state);
+			if (chunk_state == NVM_CHUNK_STATE_FREE) {
+				NVM_DEBUG("Chunk(ch %d, lun %d, chunk %d) is already in FREE state", npugrp_i, npunit_i, addr_20.l.chunk);
+				continue;
+			} else if (chunk_state == NVM_CHUNK_STATE_OPEN) {
+				fprintf(stderr, "Chunk(ch %d, lun %d, chunk %d) is in OPEN state\n", npugrp_i, npunit_i, addr_20.l.chunk);
+				continue;
+			}
+
+			d_addr = nvm_addr_gen2dev(dev, addr_20_tmp[0]);
+
+			spdk_ocssd_banana_chunk_reset_cmd(&cmd, d_addr, BANANA_DEV_PHY_RESET);
+
+
+			spdk_bdev_aio_req_set_io_passthru(reqs[req_idx], &cmd, NULL, 0, NULL, 0);
+			spdk_bdev_aio_req_set_private_arg(reqs[req_idx], naddr_arg);
+			req_idx++;
 		}
+	}
 
-		d_addr = nvm_be_addr_gen2dev_glue(dev,  &addrs[i]);
-		spdk_ocssd_banana_write_cmd(&cmd, d_addr, BANANA_DEV_FAKE_LBA);
-
-		spdk_bdev_aio_req_set_io_passthru(reqs[i], &cmd, data_loop, sector_nbytes,
-				meta_loop, meta_nbytes);
-		spdk_bdev_aio_req_set_private_arg(reqs[i], naddr_arg);
+	if (req_idx == 0) {
+		errno = EINVAL;
+		goto failed;
 	}
 
 	ctx->opcode = OP_WRITE;
 
-	rc = spdk_bdev_aio_ctx_submit(async_ctx, naddrs, reqs);
+	naddr_arg->cpl_count = req_idx;
+	rc = spdk_bdev_aio_ctx_submit(async_ctx, req_idx, reqs);
 	if (rc) {
 		goto failed;
 	}
 
-	free(reqs);
+	for (i = req_idx; i < npunit * npugrp; i++) {
+		free(reqs[i]);
+	}
+
 	return 0;
 
 failed:
 	if (reqs != NULL) {
-		for (i = 0; i < naddrs; i++) {
+		for (i = 0; i < npunit * npugrp; i++) {
 			if (reqs[i] != NULL) {
 				free(reqs[i]);
 			}
@@ -828,90 +930,105 @@ failed:
 	}
 
 	free(naddr_arg);
-	free(reqs);
 
 	return -1;
 }
 
 ssize_t nvm_addr_beta_banana_async_erase_sb(struct nvm_dev* dev, struct cmd_ctx* ctx, uint16_t flags)
 {
+	return nvm_addr_beta_banana_async_erase_one_sb(dev, ctx, flags);
+}
+
+ssize_t nvm_addr_beta_banana_async_parity_init(struct nvm_dev* dev, struct cmd_ctx* ctx)
+{
 	struct nvm_be_spdk_advanced_state *state = dev->be_state;
 	struct spdk_bdev_aio_ctx *async_ctx = state->async_ctx;
-	struct spdk_nvme_cmd cmd = {0};
-	int naddrs = ctx->naddrs;
-	size_t npugrp = dev->geo.l.npugrp;
-	size_t npunit = dev->geo.l.npunit;
-	int nchks = npugrp * npunit;
-	struct nvm_addr *addrs = ctx->addrs;
-	int rc, i, req_idx;
-	uint16_t npugrp_i, npunit_i;
-	struct spdk_bdev_aio_req **reqs = NULL;
+	struct spdk_bdev_aio_req *reqs[1] = {0};
 	struct cmd_ctx_naddr_arg *naddr_arg = NULL;
-	uint64_t d_addr;
-	struct nvm_addr addr_tmp[1] = {0};
+	struct spdk_nvme_cmd cmd = {0};
+	int rc, i, j, req_idx;
+	uint64_t *chk_ppa_lists;
+	uint64_t parity_ppa = 0;
+	struct nvm_addr p_addr_20[1];
+	struct nvm_vblk *vblk;
+	struct nvm_addr *p_addr_12;
 
-	assert(async_ctx);
+
+	if (ctx->naddrs != 1) {
+		NVM_DEBUG("FAILED: Raid Operation requires only 1 addr");
+		errno = EINVAL;
+		return -1;
+	}
 
 	naddr_arg = malloc(sizeof(*naddr_arg));
 	if (naddr_arg == NULL) {
-		errno = -ENOMEM;
+		errno = ENOMEM;
 		return -1;
 	}
-	naddr_arg->cpl_count = naddrs * nchks;
 	naddr_arg->ctx = ctx;
 
-	reqs = calloc(naddrs * nchks, sizeof(*reqs));
-	if (reqs == NULL) {
-		errno = -ENOMEM;
-		goto failed;
-	}
-	for (i = 0; i < naddrs * nchks; i++) {
+	for (i = 0; i < 1; i++) {
 		reqs[i] = malloc(spdk_bdev_aio_req_size());
 		if (reqs[i] == NULL) {
-			errno = -ENOMEM;
+			errno = ENOMEM;
 			goto failed;
 		}
 	}
 
-	req_idx = 0;
-	for (i = 0; i < naddrs; i++) {
-		if (addrs[i].g.ch != 0 || addrs[i].g.lun != 0 || addrs[i].g.pg != 0) {
-			NVM_DEBUG("FAILED: illegal address for super block");
-			errno = -EIO;
-			return -1;
-		}
+	p_addr_12 = &ctx->addrs[0];
+	p_addr_20[0] = nvm_be_addr_format_glue(dev, p_addr_12);
 
-		addr_tmp->g.blk = addrs[i].g.blk;
+	vblk = nvm_vblk_alloc_filtered_line(dev, p_addr_20->l.chunk);
+	beta_banana_dev_vblk_set(dev, p_addr_20->l.chunk, vblk);
 
-		for (npunit_i = 0; npunit_i < npunit; npunit_i++) {
-			addr_tmp->g.lun = npunit_i;
+	chk_ppa_lists = nvm_buf_alloc(dev, sizeof(uint64_t) * vblk->nblks, NULL);
+	for (i = 0, j = 0; i < vblk->nblks; j++, i++) {
+			uint64_t blk_ppa = nvm_addr_gen2dev(dev,  vblk->blks[i]);
 
-			for (npugrp_i = 0; npugrp_i < npugrp; npugrp_i++) {
-				addr_tmp->g.ch = npugrp_i;
-
-				d_addr = nvm_be_addr_gen2dev_glue(dev,  addr_tmp);
-				spdk_ocssd_banana_chunk_reset_cmd(&cmd, d_addr, BANANA_DEV_PHY_RESET);
-
-				spdk_bdev_aio_req_set_io_passthru(reqs[req_idx], &cmd, NULL, 0, NULL, 0);
-				spdk_bdev_aio_req_set_private_arg(reqs[req_idx], naddr_arg);
-				req_idx++;
+#ifdef DEBUG_DETAIL
+			nvm_addr_prn(&vblk->blks[i], 1, dev);
+#endif
+			/* extract out parity_ppa from vblks due to AB06 limitation */
+			if ((vblk->blks[i].l.pugrp == p_addr_20->l.pugrp) && (vblk->blks[i].l.punit == p_addr_20->l.punit)) {
+				parity_ppa = blk_ppa;
+				NVM_DEBUG_DETAIL("parity ppa (list_idx %d, blk_idx %d) is %lu", j, i, blk_ppa);
+				j--;
+			} else {
+				chk_ppa_lists[j] = blk_ppa;
+				NVM_DEBUG_DETAIL("ppa (list_idx %d, blk_idx %d) is %lu", j, i, blk_ppa);
 			}
-		}
 	}
 
-	ctx->opcode = OP_WRITE;
+	spdk_ocssd_banana_parity_init_cmd(&cmd, chk_ppa_lists, vblk->nblks - 2, parity_ppa);
 
+	req_idx = 0;
+	spdk_bdev_aio_req_set_io_passthru(reqs[req_idx], &cmd, chk_ppa_lists, 4096, NULL, 0);
+	spdk_bdev_aio_req_set_private_arg(reqs[req_idx], naddr_arg);
+	req_idx = 1;
+
+
+	if (req_idx == 0) {
+		errno = EINVAL;
+		goto failed;
+	}
+
+	ctx->opcode = OP_PARITY_INIT;
+
+	naddr_arg->cpl_count = req_idx;
 	rc = spdk_bdev_aio_ctx_submit(async_ctx, req_idx, reqs);
 	if (rc) {
 		goto failed;
 	}
 
-	free(reqs);
+	for (i = req_idx; i < 1; i++) {
+		free(reqs[i]);
+	}
+
 	return 0;
 
 failed:
 	if (reqs != NULL) {
-		for (i = 0; i < naddrs * nchks; i++) {
+		for (i = 0; i < 1; i++) {
 			if (reqs[i] != NULL) {
 				free(reqs[i]);
 			}
@@ -919,15 +1036,10 @@ failed:
 	}
 
 	free(naddr_arg);
-	free(reqs);
 
 	return -1;
 }
 
-ssize_t nvm_addr_beta_banana_async_parity_init(struct nvm_dev* dev, struct cmd_ctx* ctx)
-{
-	return -1;
-}
 ssize_t nvm_addr_beta_banana_async_parity_out(struct nvm_dev* dev, struct cmd_ctx* ctx)
 {
 	return -1;
@@ -1075,7 +1187,6 @@ struct beta_banana_dev_ctx {
 /* setup vblks for the device */
 static int beta_banana_dev_init_vblk(struct nvm_dev *dev, struct beta_banana_dev_ctx *ctx)
 {
-	const int verid = nvm_dev_get_verid(dev);
 	const struct nvm_geo *geo = nvm_dev_get_geo(dev);
 	int nchunk;
 	struct nvm_vblk **nvm_vblks;
@@ -1121,7 +1232,6 @@ static int beta_banana_dev_fini_vblk(struct nvm_dev *dev, struct beta_banana_dev
 static struct nvm_vblk *
 nvm_vblk_alloc_filtered_line(struct nvm_dev *dev, int chunk)
 {
-	const int verid = nvm_dev_get_verid(dev);
 	const struct nvm_geo *geo = nvm_dev_get_geo(dev);
 	struct nvm_vblk *vblk;
 	struct nvm_addr addr_20[1] = {};
@@ -1487,8 +1597,8 @@ struct nvm_beta_spec_dev beta_banana_dev = {
 		.addr_async_read = nvm_addr_beta_banana_async_read,
 		.addr_async_protected_write = nvm_addr_beta_banana_async_protected_write,
 		.addr_async_erase_sb = nvm_addr_beta_banana_async_erase_sb,
-//		.addr_async_parity_init = nvm_addr_beta_banana_async_parity_init,
-//		.addr_async_parity_out = nvm_addr_beta_banana_async_parity_out,
+		.addr_async_parity_init = nvm_addr_beta_banana_async_parity_init,
+		.addr_async_parity_out = nvm_addr_beta_banana_async_parity_out,
 //		.async_read_pm = nvm_beta_banana_async_read_pm,
 //		.async_write_pm = nvm_beta_banana_async_write_pm,
 
