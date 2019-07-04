@@ -46,13 +46,97 @@ struct nvm_be nvm_be_spdk_advanced = {
 #include <nvm_be_spdk_advanced.h>
 #include <nvm_beta_cmd.h>
 
+/* redefine WRT */
+#define BANANA_DEV_OPT_WRT_NSECTOR	32 // 128KB / 4KB
+#define BANANA_DEV_OPT_WRT_NSECTOR_POWER	5 // 128KB / 4KB
+
+/* this function is used to set geo 12 elements by its 20 elements */
+static inline void nvm_be_geo_format_to_s20(struct nvm_geo *geo_12)
+{
+	geo_12->l.npugrp = geo_12->nchannels;
+	geo_12->l.npunit = geo_12->nluns;
+	geo_12->l.nchunk = geo_12->nblocks;
+	geo_12->l.nsectr = geo_12->npages * geo_12->nsectors;
+	geo_12->l.nbytes = geo_12->sector_nbytes;
+	geo_12->l.nbytes_oob = geo_12->meta_nbytes / geo_12->nsectors;
+}
+
+static inline void nvm_be_geo_format_to_s12(struct nvm_geo *geo_20)
+{
+	geo_20->nchannels = geo_20->l.npugrp;
+	geo_20->nluns = geo_20->l.npunit;
+	geo_20->nblocks = geo_20->l.nchunk;
+	geo_20->nplanes = 1;
+	geo_20->nsectors = BANANA_DEV_OPT_WRT_NSECTOR;
+	geo_20->npages = geo_20->l.nsectr / geo_20->nsectors;
+	geo_20->sector_nbytes = geo_20->l.nbytes;
+	geo_20->page_nbytes = geo_20->l.nbytes * geo_20->nsectors;
+	geo_20->meta_nbytes = geo_20->l.nbytes_oob * geo_20->nsectors;
+
+}
+
+static void nvm_spec_idty_s20_to_s12(struct nvm_spec_idfy *idfy_s20, struct nvm_spec_idfy *idfy_s12)
+{
+	struct nvm_spec_idfy_s12 *s12 = &idfy_s12->s12;
+	struct nvm_spec_idfy_s20 *s20 = &idfy_s20->s20;
+
+//	struct nvm_spec_ppaf_nand *ppaf;
+	struct nvm_spec_idfy_cgrp *cgrp = s12->grp;
+
+	s12->verid = NVM_SPEC_VERID_12;
+	s12->vnvmt = 0;
+	s12->cgroups = 1;
+	s12->cap = 0x1; /* BBT is enabled by simulation */
+	s12->dom = 0x0; /* L2P is only in host; ECC is provided by device */
+
+	s12->ppaf.n.sec_len = BANANA_DEV_OPT_WRT_NSECTOR_POWER;
+	s12->ppaf.n.pg_len = s20->lbaf.sectr - s12->ppaf.n.sec_len;
+	s12->ppaf.n.blk_len = s20->lbaf.chunk;
+	s12->ppaf.n.pl_len = 0;
+	s12->ppaf.n.lun_len = s20->lbaf.punit;
+	s12->ppaf.n.ch_len = s20->lbaf.pugrp;
+
+	s12->ppaf.n.sec_off = 0;
+	s12->ppaf.n.pg_off = s12->ppaf.n.sec_len;
+	s12->ppaf.n.blk_off = s12->ppaf.n.pg_off + s12->ppaf.n.pg_len;
+	s12->ppaf.n.pl_off = s12->ppaf.n.blk_off + s12->ppaf.n.blk_len;
+	s12->ppaf.n.lun_off = s12->ppaf.n.pl_off + s12->ppaf.n.pl_len;
+	s12->ppaf.n.ch_off = s12->ppaf.n.lun_off + s12->ppaf.n.lun_len;
+
+	cgrp->mtype = 0;
+	cgrp->fmtype = 0;
+
+	cgrp->num_ch = s20->lgeo.npugrp;
+	cgrp->num_lun = s20->lgeo.npunit;
+	cgrp->num_pln = 1;
+	cgrp->num_blk = s20->lgeo.nchunk;
+	cgrp->num_pg = s20->lgeo.nsectr / BANANA_DEV_OPT_WRT_NSECTOR;
+
+	cgrp->fpg_sz = BANANA_DEV_OPT_WRT_NSECTOR * 4096;
+	/* sector size and meta should be decided by ns-data */
+	cgrp->csecs = 4096;
+	cgrp->sos = 0;
+
+	cgrp->trdt = s20->perf.trdt;
+	cgrp->trdm = s20->perf.trdm;
+	cgrp->tprt = s20->perf.twrt;
+	cgrp->tprm = s20->perf.twrm;
+	cgrp->tbet = s20->perf.tcet;
+	cgrp->tbem = s20->perf.tcem;
+
+	cgrp->mpos = 0xFFFFFF;	/* Assume all multi-plane operations are supported */
+	cgrp->mccap = 0x1;	/* Assume device is SLC */
+	cgrp->cpar = 128;	/* Assume 128 */
+	cgrp->mts[0] = 0;	/* Not implemented */
+}
+
 struct nvm_spec_idfy *nvm_be_spdk_advanced_geometry(struct nvm_dev *dev,
 				       struct nvm_ret *ret)
 {
 	struct nvm_be_spdk_advanced_state *state = dev->be_state;
 	struct spdk_bdev_target *bt = state->bt;
 	struct spdk_bdev_ret internal_ret = {0};
-	struct nvm_spec_idfy *idfy = NULL;
+	struct nvm_spec_idfy *idfy;
 	const size_t idfy_len = sizeof(*idfy);
 	int rc;
 
@@ -80,6 +164,30 @@ struct nvm_spec_idfy *nvm_be_spdk_advanced_geometry(struct nvm_dev *dev,
 	}
 
 	return idfy;
+}
+
+struct nvm_spec_idfy *nvm_be_spdk_advanced_geometry_s12(struct nvm_dev *dev,
+				       struct nvm_ret *ret)
+{
+	struct nvm_spec_idfy *idfy, *idfy_s12;
+
+	idfy = nvm_be_spdk_advanced_geometry(dev, ret);
+
+	if (idfy->s.verid == NVM_SPEC_VERID_12) {
+		idfy_s12 = idfy;
+	} else if (idfy->s.verid == NVM_SPEC_VERID_20) {
+		idfy_s12 = nvm_buf_alloc(dev, sizeof(struct nvm_spec_idfy), NULL);
+		assert(idfy_s12);
+		memset(idfy_s12, 0, sizeof(struct nvm_spec_idfy));
+
+		nvm_spec_idty_s20_to_s12(idfy, idfy_s12);
+		nvm_buf_free(dev, idfy);
+	} else {
+		nvm_buf_free(dev, idfy);
+		idfy_s12 = NULL;
+	}
+
+	return idfy_s12;
 }
 
 static struct nvm_nvme_ns *nvm_be_spdk_advanced_ns_data(struct nvm_dev *dev,
@@ -233,13 +341,14 @@ struct nvm_dev *nvm_be_spdk_advanced_open(const char *dev_path, int NVM_UNUSED(f
 		goto failed;
 	}
 
+	nvm_be_geo_format_to_s20(&dev->geo);
+
 	rc = dev->beta_dev->beta_spec_dev_init(dev);
 	if (rc) {
 		NVM_DEBUG("FAILED: beta_spec_dev_init");
 		goto failed;
 	}
 
-	nvm_be_geo_format_glue(dev->verid, &dev->geo);
 
 	NVM_DEBUG("Let's go!");
 
@@ -258,7 +367,7 @@ struct nvm_be nvm_be_spdk_advanced = {
 	.open = nvm_be_spdk_advanced_open,
 	.close = nvm_be_spdk_advanced_close,
 
-	.idfy = nvm_be_spdk_advanced_geometry,
+	.idfy = nvm_be_spdk_advanced_geometry_s12,
 
 	.rprt = nvm_be_nosys_rprt,
 	.gfeat = nvm_be_nosys_gfeat,

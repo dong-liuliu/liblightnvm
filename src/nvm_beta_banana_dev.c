@@ -47,7 +47,7 @@ static struct nvm_vblk *beta_banana_dev_vblk_get(struct nvm_dev *dev, int chunk_
 
 struct nvm_addr nvm_be_addr_format_glue(struct nvm_dev *dev, struct nvm_addr *addr_12)
 {
-	assert(dev->verid == NVM_SPEC_VERID_20);
+	assert(dev->verid == NVM_SPEC_VERID_12);
 	struct nvm_geo *geo = &dev->geo;
 	struct nvm_addr addr_20 = {0};
 
@@ -1073,7 +1073,7 @@ struct nvm_spec_rprt *nvm_beta_banana_rprt(struct nvm_dev *dev, struct nvm_addr 
 	int rc;
 	size_t count;
 
-	if (NVM_SPEC_VERID_20 != dev->verid) {
+	if (NVM_SPEC_VERID_12 != dev->verid) {
 		errno = EINVAL;
 		return NULL;
 	}
@@ -1187,11 +1187,12 @@ struct beta_banana_dev_ctx {
 /* setup vblks for the device */
 static int beta_banana_dev_init_vblk(struct nvm_dev *dev, struct beta_banana_dev_ctx *ctx)
 {
+	const int verid = nvm_dev_get_verid(dev);
 	const struct nvm_geo *geo = nvm_dev_get_geo(dev);
 	int nchunk;
 	struct nvm_vblk **nvm_vblks;
 
-	assert(verid == NVM_SPEC_VERID_20);
+	assert(verid == NVM_SPEC_VERID_12);
 	nchunk = geo->l.nchunk;
 
 	nvm_vblks = (struct nvm_vblk **)calloc(nchunk, sizeof(struct nvm_vblk *));
@@ -1219,7 +1220,6 @@ static int beta_banana_dev_fini_vblk(struct nvm_dev *dev, struct beta_banana_dev
 
 	nvm_vblks = ctx->nvm_vblks;
 	nchunk = geo->l.nchunk;
-
 	for (i = 0; i < nchunk; i++) {
 		if (nvm_vblks[i]) {
 			nvm_vblk_free(nvm_vblks[i]);
@@ -1232,6 +1232,7 @@ static int beta_banana_dev_fini_vblk(struct nvm_dev *dev, struct beta_banana_dev
 static struct nvm_vblk *
 nvm_vblk_alloc_filtered_line(struct nvm_dev *dev, int chunk)
 {
+	const int verid = nvm_dev_get_verid(dev);
 	const struct nvm_geo *geo = nvm_dev_get_geo(dev);
 	struct nvm_vblk *vblk;
 	struct nvm_addr addr_20[1] = {};
@@ -1240,7 +1241,7 @@ nvm_vblk_alloc_filtered_line(struct nvm_dev *dev, int chunk)
 	if (!vblk)
 		return NULL;	// Propagate errno
 
-	assert(verid == NVM_SPEC_VERID_20);
+	assert(verid == NVM_SPEC_VERID_12);
 	for (uint32_t punit = 0; punit < geo->l.npunit; ++punit) {
 		for (uint32_t pugrp = 0; pugrp < geo->l.npugrp; ++pugrp) {
 			addr_20->l.pugrp = pugrp;
@@ -1384,7 +1385,7 @@ static int beta_banana_dev_init_bbts(struct nvm_dev *dev, struct beta_banana_dev
 	int i, j;
 	int rc;
 
-	if (verid == NVM_SPEC_VERID_12) {
+	if (verid != NVM_SPEC_VERID_12) {
 		assert(0);
 		return -1;
 	}

@@ -53,25 +53,6 @@ void nvm_be_spdk_advanced_close(struct nvm_dev *dev);
 
 struct nvm_dev *nvm_be_spdk_advanced_open(const char *dev_path, int flags);
 
-
-/* this function is used to set geo 12 elements by its 20 elements */
-static inline void nvm_be_geo_format_glue(int verid, struct nvm_geo *geo)
-{
-#ifdef NVM_APP_ADDR_12
-	if (verid == NVM_SPEC_VERID_20) {
-		geo->nchannels = geo->l.npugrp;
-		geo->nluns = geo->l.npunit;
-		geo->nblocks = geo->l.nchunk;
-		geo->nplanes = 1;
-		geo->nsectors = 32;
-		geo->npages = geo->l.nsectr / geo->nsectors;
-		geo->sector_nbytes = geo->l.nbytes;
-		geo->page_nbytes = geo->l.nbytes * geo->nsectors;
-		geo->meta_nbytes = geo->l.nbytes_oob * geo->nsectors;
-	}
-#endif
-}
-
 struct nvm_addr nvm_be_addr_format_glue(struct nvm_dev *dev, struct nvm_addr *addr_12);
 uint64_t nvm_be_addr_gen2dev_glue(struct nvm_dev *dev, struct nvm_addr *addr_12);
 

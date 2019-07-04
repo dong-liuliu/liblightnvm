@@ -173,10 +173,11 @@ struct nvm_spec_idfy_cgrp {
 	uint8_t rsdv_7;
 	uint16_t num_blk;
 	uint16_t num_pg;
-	uint16_t fpg_sz;
+//	uint16_t fpg_sz;
+	uint32_t fpg_sz;
 	uint16_t csecs;
 	uint16_t sos;
-	uint8_t rsvd_18_19[2];
+//	uint8_t rsvd_18_19[2];
 	uint32_t trdt;
 	uint32_t trdm;
 	uint32_t tprt;
